@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Devika's Little Library</title>
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+<link rel="shortcut icon" href="./assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -290,7 +292,8 @@ body {
   max-width: none;
   max-height: none;
   height: auto;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
 }
 .tap-feedback {
   position: absolute;
@@ -745,6 +748,8 @@ const AUTH_SESSION_KEY = 'devika_lib_supabase_session_v1';
 const READER_WHEEL_PAGE_DELTA = 260;
 const READER_KEY_SCROLL_FACTOR = 0.5;
 const READER_MAX_RENDER_DPR = 2.2;
+const READER_PAGE_FADE_OUT_MS = 95;
+const READER_PAGE_FADE_IN_MS = 300;
 const READER_CHROME_HIDE_MS = 2600;
 const READER_CHROME_HOVER_REGION_PX = 108;
 const READER_HIDE_GRACE_MS = 1300;
@@ -2770,8 +2775,10 @@ async function renderReaderPage() {
   const canvas = document.getElementById('reader-canvas');
   const ctx = canvas.getContext('2d');
 
+  canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
   canvas.style.opacity = '0';
-  canvas.style.transform = 'scale(0.985)';
+  canvas.style.transform = 'scale(0.992)';
+  await new Promise(resolve => setTimeout(resolve, READER_PAGE_FADE_OUT_MS));
 
   const outputScale = Math.min(Math.max(window.devicePixelRatio || 1, 1), READER_MAX_RENDER_DPR);
   canvas.width = Math.ceil(viewport.width * outputScale);
@@ -2789,8 +2796,10 @@ async function renderReaderPage() {
   try {
     await readerRenderTask.promise;
     requestAnimationFrame(() => {
-      canvas.style.opacity = '1';
-      canvas.style.transform = 'scale(1)';
+      requestAnimationFrame(() => {
+        canvas.style.opacity = '1';
+        canvas.style.transform = 'scale(1)';
+      });
     });
   } catch(err) {
     if(err?.name !== 'RenderingCancelledException') throw err;
@@ -2852,14 +2861,14 @@ async function openReader(id) {
     markInteraction();
     readerZoom = Math.max(0.7, readerZoom - 0.15);
     const canvas = document.getElementById('reader-canvas');
-    if(canvas) canvas.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    if(canvas) canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
     await renderReaderPage();
   };
   document.getElementById('reader-zoom-in-btn').onclick = async () => {
     markInteraction();
     readerZoom = Math.min(3.0, readerZoom + 0.15);
     const canvas = document.getElementById('reader-canvas');
-    if(canvas) canvas.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    if(canvas) canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
     await renderReaderPage();
   };
   document.getElementById('reader-fit-btn').onclick = async () => {
@@ -3432,6 +3441,7 @@ document.addEventListener('keydown', async e => {
 </script>
 </body>
 </html>
+
 
 
 
