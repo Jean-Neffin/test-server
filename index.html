@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Devika's Little Library</title>
-<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
-<link rel="shortcut icon" href="./assets/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -292,7 +290,7 @@ body {
   max-width: none;
   max-height: none;
   height: auto;
-  transition: opacity 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: opacity 0.34s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: opacity, transform;
 }
 .tap-feedback {
@@ -748,8 +746,8 @@ const AUTH_SESSION_KEY = 'devika_lib_supabase_session_v1';
 const READER_WHEEL_PAGE_DELTA = 260;
 const READER_KEY_SCROLL_FACTOR = 0.5;
 const READER_MAX_RENDER_DPR = 2.2;
-const READER_PAGE_FADE_OUT_MS = 95;
-const READER_PAGE_FADE_IN_MS = 300;
+const READER_PAGE_FADE_OUT_MS = 110;
+const READER_PAGE_FADE_IN_MS = 340;
 const READER_CHROME_HIDE_MS = 2600;
 const READER_CHROME_HOVER_REGION_PX = 108;
 const READER_HIDE_GRACE_MS = 1300;
@@ -2404,6 +2402,8 @@ let readerLastTapTs = 0;
 let readerTouchMoved = false;
 let readerTouchHintTimer = null;
 let readerLastScrollTop = 0;
+let readerRenderSeq = 0;
+let readerViewportResizeTimer = null;
 let lastInteractionTime = Date.now();
 
 function readerIsOpen() {
@@ -2665,6 +2665,40 @@ function resetReaderScrollPosition() {
   wrap.scrollTop = 0;
   wrap.scrollLeft = 0;
 }
+
+function updateReaderPanBounds() {
+  const wrap = document.getElementById('reader-canvas-wrap');
+  const canvas = document.getElementById('reader-canvas');
+  if(!wrap || !canvas) return;
+
+  const canvasWidth = Math.ceil(parseFloat(canvas.style.width || '0') || canvas.getBoundingClientRect().width || 0);
+  wrap.style.justifyContent = canvasWidth > (wrap.clientWidth + 1) ? 'flex-start' : 'center';
+
+  const maxLeft = Math.max(0, wrap.scrollWidth - wrap.clientWidth);
+  if(wrap.scrollLeft > maxLeft) wrap.scrollLeft = maxLeft;
+  if(wrap.scrollLeft < 0) wrap.scrollLeft = 0;
+}
+
+function handleReaderViewportChange() {
+  if(!readerIsOpen()) return;
+  if(readerViewportResizeTimer) clearTimeout(readerViewportResizeTimer);
+  readerViewportResizeTimer = setTimeout(async () => {
+    if(!readerIsOpen() || !readerDoc) return;
+    const wrap = document.getElementById('reader-canvas-wrap');
+    const prevTop = wrap ? wrap.scrollTop : 0;
+    const prevLeft = wrap ? wrap.scrollLeft : 0;
+    try {
+      await renderReaderPage();
+      if(wrap) {
+        const maxLeft = Math.max(0, wrap.scrollWidth - wrap.clientWidth);
+        const maxTop = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
+        wrap.scrollLeft = Math.max(0, Math.min(prevLeft, maxLeft));
+        wrap.scrollTop = Math.max(0, Math.min(prevTop, maxTop));
+      }
+      updateReaderPanBounds();
+    } catch(e) {}
+  }, 120);
+}
 async function goReaderPrev(reason = 'interaction') {
   if(!readerDoc || readerPage <= 1) return;
   showReaderChromeTemporarily(reason);
@@ -2766,6 +2800,7 @@ function updateReaderUi() {
 
 async function renderReaderPage() {
   if(!readerDoc) return;
+  const renderSeq = ++readerRenderSeq;
   if(readerRenderTask) {
     try { readerRenderTask.cancel(); } catch(e) {}
     readerRenderTask = null;
@@ -2775,10 +2810,11 @@ async function renderReaderPage() {
   const canvas = document.getElementById('reader-canvas');
   const ctx = canvas.getContext('2d');
 
-  canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
-  canvas.style.opacity = '0';
+  canvas.style.transition = 'opacity ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1)';
+  canvas.style.opacity = '0.06';
   canvas.style.transform = 'scale(0.992)';
   await new Promise(resolve => setTimeout(resolve, READER_PAGE_FADE_OUT_MS));
+  if(renderSeq !== readerRenderSeq) return;
 
   const outputScale = Math.min(Math.max(window.devicePixelRatio || 1, 1), READER_MAX_RENDER_DPR);
   canvas.width = Math.ceil(viewport.width * outputScale);
@@ -2795,8 +2831,10 @@ async function renderReaderPage() {
   readerRenderTask = page.render({ canvasContext: ctx, viewport });
   try {
     await readerRenderTask.promise;
+    if(renderSeq !== readerRenderSeq) return;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        if(renderSeq !== readerRenderSeq) return;
         canvas.style.opacity = '1';
         canvas.style.transform = 'scale(1)';
       });
@@ -2806,6 +2844,8 @@ async function renderReaderPage() {
   } finally {
     readerRenderTask = null;
   }
+
+  updateReaderPanBounds();
   if(readerBookId) updateBookReadingProgress(readerBookId, readerPage, readerTotalPages);
   updateReaderUi();
 }
@@ -2861,14 +2901,14 @@ async function openReader(id) {
     markInteraction();
     readerZoom = Math.max(0.7, readerZoom - 0.15);
     const canvas = document.getElementById('reader-canvas');
-    if(canvas) canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
+    if(canvas) canvas.style.transition = 'opacity ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1)';
     await renderReaderPage();
   };
   document.getElementById('reader-zoom-in-btn').onclick = async () => {
     markInteraction();
     readerZoom = Math.min(3.0, readerZoom + 0.15);
     const canvas = document.getElementById('reader-canvas');
-    if(canvas) canvas.style.transition = `opacity ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ${READER_PAGE_FADE_IN_MS}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
+    if(canvas) canvas.style.transition = 'opacity ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1), transform ' + READER_PAGE_FADE_IN_MS + 'ms cubic-bezier(0.22, 0.61, 0.36, 1)';
     await renderReaderPage();
   };
   document.getElementById('reader-fit-btn').onclick = async () => {
@@ -2900,6 +2940,11 @@ async function openReader(id) {
   wrap.ontouchend = async e => { await readerHandleTouchEnd(e); };
   wrap.onscroll = () => { handleReaderScrollVisibility(); };
   readerLastScrollTop = wrap.scrollTop || 0;
+  updateReaderPanBounds();
+  window.removeEventListener('resize', handleReaderViewportChange);
+  window.removeEventListener('orientationchange', handleReaderViewportChange);
+  window.addEventListener('resize', handleReaderViewportChange);
+  window.addEventListener('orientationchange', handleReaderViewportChange);
   overlay.onpointermove = e => {
     if(isMobileReaderMode()) return;
     if(e && e.clientY <= READER_CHROME_HOVER_REGION_PX) showReaderChromeTemporarily('hover');
@@ -2953,6 +2998,12 @@ function closeReader() {
     wrap.ontouchstart = null;
     wrap.ontouchend = null;
     wrap.onscroll = null;
+  }
+  window.removeEventListener('resize', handleReaderViewportChange);
+  window.removeEventListener('orientationchange', handleReaderViewportChange);
+  if(readerViewportResizeTimer) {
+    clearTimeout(readerViewportResizeTimer);
+    readerViewportResizeTimer = null;
   }
   readerWheelHandler = null;
   readerWheelDeltaCarry = 0;
@@ -3441,6 +3492,7 @@ document.addEventListener('keydown', async e => {
 </script>
 </body>
 </html>
+
 
 
 
