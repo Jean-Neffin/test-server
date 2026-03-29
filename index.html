@@ -1,0 +1,3669 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devika's Little Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fdf6ee;
+  --petal: #e8b4c0;
+  --petal-dark: #c4768a;
+  --petal-deep: #8b4a5e;
+  --blush: #f5d9e0;
+  --sage-dark: #6e9467;
+  --lav: #d4c8e8;
+  --lav-dark: #8470b5;
+  --ink: #3d2b2b;
+  --ink2: #6b4f4f;
+  --ink3: #9b7b7b;
+  --cream: #fff8f2;
+  --shadow: rgba(139,74,94,0.12);
+}
+html { scroll-behavior: smooth; }
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 10% 0%, #f5d9e040 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 10%, #d4c8e830 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, #e8b4c020 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c4768a' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='60' cy='0' r='2'/%3E%3Ccircle cx='0' cy='60' r='2'/%3E%3Ccircle cx='60' cy='60' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  color: var(--ink);
+}
+#app { max-width: 920px; margin: 0 auto; padding: 0 1rem 4rem; }
+
+.header { text-align: center; padding: 3rem 1rem 0.5rem; }
+.header-ornament { font-size: 20px; letter-spacing: 10px; margin-bottom: 10px; opacity: 0.6; display: block; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 400; color: var(--petal-deep); letter-spacing: 0.02em; line-height: 1.15; }
+.header h1 em { font-style: italic; color: var(--petal-dark); }
+.dedication { margin-top: 8px; font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--ink3); letter-spacing: 0.04em; }
+.header-rule { display: block; margin: 1.4rem auto 0; width: 100px; height: 1px; background: linear-gradient(to right, transparent, var(--petal-dark), transparent); }
+
+.stats-row { display: flex; justify-content: center; margin: 1.75rem auto 0; border: 0.5px solid var(--petal); border-radius: 50px; overflow: hidden; max-width: 500px; background: var(--cream); box-shadow: 0 2px 12px var(--shadow); }
+.stat-item { flex: 1; text-align: center; padding: 12px 6px; border-right: 0.5px solid var(--blush); }
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--petal-deep); display: block; line-height: 1; margin-bottom: 3px; }
+.stat-label { font-size: 10px; color: var(--ink3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 1.75rem 0 1.5rem; }
+.search-wrap { flex: 1 1 220px; min-width: 170px; max-width: 280px; position: relative; }
+.search-wrap::before { content: '⌕'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--petal-dark); pointer-events: none; }
+.search-wrap input { width: 100%; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 300; padding: 10px 14px 10px 38px; border: 0.5px solid var(--petal); border-radius: 30px; background: var(--cream); color: var(--ink); outline: none; transition: border-color 0.2s; }
+.search-wrap input:focus { border-color: var(--petal-dark); }
+.toolbar select { font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 300; padding: 10px 30px 10px 14px; border: 0.5px solid var(--petal); border-radius: 30px; background: var(--cream); color: var(--ink); outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c4768a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; transition: border-color 0.2s; }
+.toolbar select:focus { border-color: var(--petal-dark); }
+
+.btn { font-family: 'Lato', sans-serif; font-size: 12px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 18px; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: transform 0.15s, box-shadow 0.15s; border: none; }
+.btn:active { transform: scale(0.97) !important; }
+.btn-primary { border: 0.5px solid var(--petal-dark); background: linear-gradient(135deg, var(--blush), var(--petal) 130%); color: var(--petal-deep); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--shadow); }
+.btn-ghost { border: 0.5px solid var(--blush); background: transparent; color: var(--ink3); }
+.btn-ghost:hover { border-color: var(--petal); color: var(--ink2); }
+.btn-danger { border: 0.5px solid #e8c0c0; background: transparent; color: #b07070; }
+.btn-danger:hover { background: #fdf0f0; }
+.btn-sage { border: 0.5px solid #a8c8a0; background: #eaf4e8; color: var(--sage-dark); }
+.btn-sage:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(110,148,103,0.15); }
+.btn-lav { border: 0.5px solid #b0a0d8; background: #ece8f8; color: var(--lav-dark); }
+.btn-lav:hover { transform: translateY(-1px); }
+
+.library-section { margin-bottom: 16px; }
+.section-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--petal-deep); font-style: italic; margin: 10px 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 20px; }
+.book-card { position: relative; display: flex; flex-direction: column; background: var(--cream); border: 0.5px solid var(--blush); border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s, border-color 0.2s, background 0.2s; animation: fadeUp 0.35s ease both; }
+.book-card:hover { transform: translateY(-5px) rotate(0.4deg); box-shadow: 0 10px 28px var(--shadow); }
+.book-card.batch-selected {
+  border-color: var(--petal-dark);
+  background: linear-gradient(180deg, #fff8fb 0%, var(--cream) 55%);
+  box-shadow: 0 0 0 2px rgba(196,118,138,0.35), 0 14px 30px rgba(139,74,94,0.24);
+  transform: translateY(-4px);
+}
+.book-card.batch-selected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(196,118,138,0.28);
+  pointer-events: none;
+}
+.book-card.batch-selected .card-title { color: #7d3c50; }
+.book-card.batch-selected .card-author { color: #8b6470; }
+.batch-check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 0.5px solid rgba(139,74,94,0.5);
+  background: rgba(255,248,250,0.94);
+  color: var(--petal-dark);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 4;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s, color 0.15s;
+}
+.batch-check:hover { transform: scale(1.08); }
+.batch-check.on {
+  background: linear-gradient(135deg, #f3d2de, #e8b4c0);
+  border-color: var(--petal-dark);
+  color: #ffffff;
+}
+.cover-wrap { width: 100%; height: 200px; overflow: hidden; position: relative; }
+.cover-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.cover-placeholder .ph-icon { font-size: 30px; }
+.cover-placeholder .ph-title { font-family: 'Playfair Display', serif; font-size: 11px; font-style: italic; text-align: center; padding: 0 12px; line-height: 1.4; opacity: 0.85; }
+.has-pdf-badge { position: absolute; bottom: 8px; left: 8px; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; background: rgba(255,248,242,0.93); color: var(--petal-deep); border: 0.5px solid var(--petal); }
+.status-dot { position: absolute; top: 9px; right: 9px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.dot-read { background: var(--sage-dark); }
+.dot-reading { background: var(--lav-dark); }
+.dot-unread { background: var(--petal-dark); }
+.card-body { padding: 11px 13px 13px; flex: 1; }
+.card-title { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 400; color: var(--ink); line-height: 1.35; margin-bottom: 3px; }
+.card-author { font-size: 11px; color: var(--ink3); margin-bottom: 9px; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+.status-pill { font-size: 9px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+.pill-read { background: #ddf0da; color: var(--sage-dark); }
+.pill-reading { background: var(--lav); color: var(--lav-dark); }
+.pill-unread { background: var(--blush); color: var(--petal-deep); }
+.genre-label { font-size: 10px; color: var(--ink3); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.empty { grid-column: 1/-1; text-align: center; padding: 5rem 1rem; color: var(--ink3); }
+.empty-icon { font-size: 44px; margin-bottom: 14px; display: block; opacity: 0.55; }
+.empty p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 16px; line-height: 1.6; }
+
+.overlay { position: fixed; inset: 0; z-index: 300; background: rgba(61,43,43,0.38); display: flex; align-items: center; justify-content: center; padding: 1rem; animation: fadeOverlay 0.18s ease; }
+.modal { background: var(--cream); border: 0.5px solid var(--blush); border-radius: 18px; width: 100%; max-width: 430px; max-height: 94vh; overflow-y: auto; padding: 1.75rem 1.5rem; animation: slideUp 0.22s cubic-bezier(.34,1.4,.64,1); }
+.modal-header { text-align: center; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--blush); }
+.modal-floral { font-size: 18px; letter-spacing: 8px; margin-bottom: 6px; opacity: 0.6; display: block; }
+.modal h2 { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 400; color: var(--petal-deep); font-style: italic; }
+.field { margin-bottom: 15px; }
+.field label { display: block; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+.field input, .field select, .field textarea { width: 100%; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 300; padding: 9px 12px; border: 0.5px solid var(--blush); border-radius: 10px; background: var(--bg); color: var(--ink); outline: none; resize: vertical; transition: border-color 0.2s; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--petal-dark); }
+.field textarea { min-height: 80px; line-height: 1.6; }
+.field select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c4768a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px; cursor: pointer; }
+
+.upload-zone { border: 1.5px dashed var(--petal); border-radius: 12px; padding: 1.25rem; text-align: center; background: #fdf0f4; cursor: pointer; transition: background 0.2s, border-color 0.2s; position: relative; overflow: hidden; }
+.upload-zone:hover, .upload-zone.drag { background: var(--blush); border-color: var(--petal-dark); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-zone .uz-icon { font-size: 26px; margin-bottom: 6px; display: block; }
+.upload-zone .uz-text { font-size: 13px; color: var(--petal-deep); font-family: 'Playfair Display', serif; font-style: italic; }
+.upload-zone .uz-sub { font-size: 10px; color: var(--ink3); margin-top: 4px; letter-spacing: 0.06em; }
+.pdf-attached { display: flex; align-items: center; gap: 10px; background: #eaf4e8; border: 0.5px solid #a8c8a0; border-radius: 10px; padding: 10px 12px; margin-top: 8px; }
+.pdf-attached .pdf-icon { font-size: 18px; flex-shrink: 0; }
+.pdf-attached .pdf-name { font-size: 12px; color: var(--sage-dark); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-attached .pdf-size { font-size: 11px; color: var(--ink3); flex-shrink: 0; }
+.pdf-attached button { font-size: 12px; color: #b07070; background: none; border: none; cursor: pointer; flex-shrink: 0; padding: 2px 4px; }
+.upload-inline-status { margin-top: 8px; font-size: 11px; color: var(--ink3); font-style: italic; min-height: 16px; }
+
+.batch-file-list { margin-top: 10px; display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+.batch-file-item { display: flex; align-items: center; gap: 8px; background: #eef8ed; border: 0.5px solid #a8c8a0; border-radius: 10px; padding: 8px 10px; }
+.batch-file-icon { font-size: 14px; }
+.batch-file-name { flex: 1; font-size: 12px; color: var(--sage-dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.batch-file-size { font-size: 11px; color: var(--ink3); }
+.batch-file-remove { background: none; border: none; color: #b07070; font-size: 14px; cursor: pointer; padding: 2px 4px; }
+
+.palette-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.palette-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.12s, border-color 0.12s; flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.palette-swatch.sel { border-color: var(--petal-deep); transform: scale(1.18); }
+.palette-swatch:hover:not(.sel) { transform: scale(1.1); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid var(--blush); flex-wrap: wrap; }
+
+.modal-wide { max-width: 480px; }
+.detail-cover { width: 100%; height: 230px; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; box-shadow: 0 4px 18px var(--shadow); }
+.detail-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-cover-ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.detail-cover-ph .big-icon { font-size: 48px; }
+.detail-cover-ph .big-title { font-family: 'Playfair Display', serif; font-size: 14px; font-style: italic; text-align: center; padding: 0 1rem; line-height: 1.4; opacity: 0.85; }
+.detail-title { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 400; font-style: italic; color: var(--ink); margin-bottom: 3px; }
+.detail-author { font-size: 13px; color: var(--ink3); margin-bottom: 12px; letter-spacing: 0.04em; }
+.detail-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+.detail-status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 2px 0 10px; }
+.detail-status-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); }
+.detail-status-buttons { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.detail-status-btn { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; border: 0.5px solid var(--blush-dark); background: transparent; color: var(--petal-deep); cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.detail-status-btn:hover { background: #fde8ef; border-color: #d69bb0; }
+.detail-status-btn.active { background: #f4d4df; border-color: #c5768c; color: #7e3f52; font-weight: 600; }
+.detail-pdf-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.detail-divider { border: none; border-top: 0.5px solid var(--blush); margin: 14px 0; }
+.detail-notes-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink3); margin-bottom: 8px; }
+.detail-notes { font-size: 13px; font-weight: 300; color: var(--ink2); line-height: 1.75; white-space: pre-wrap; font-style: italic; }
+
+.reader-overlay { position: fixed; inset: 0; height: 100vh; z-index: 500; background: radial-gradient(circle at center, #1e0f0f 0%, #120707 100%); display: flex; flex-direction: column; animation: fadeOverlay 0.2s ease; overflow: hidden; }
+.reader-bar {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(70%, 1550px);
+  border-radius: 18px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(env(safe-area-inset-top, 0px) + 14px) 14px 14px;
+  border: 0.5px solid rgba(255,255,255,0.16);
+  background: rgba(20, 8, 10, 0.72);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.32);
+  flex-wrap: wrap;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition-delay: 0s;
+}
+.reader-overlay.chrome-hidden .reader-bar {
+  opacity: 0;
+  transform: translate(-50%, calc(-100% - 8px));
+  pointer-events: none;
+  transition-delay: 0.1s;
+}
+.reader-bar .reader-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: rgba(255,255,255,0.85);
+  flex: 1 1 170px;
+  min-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reader-meta { font-size: 11px; letter-spacing: 0.08em; color: rgba(255,255,255,0.66); text-transform: uppercase; white-space: nowrap; }
+.reader-zoom-meta { font-size: 11px; letter-spacing: 0.08em; color: rgba(210,228,247,0.82); text-transform: uppercase; white-space: nowrap; }
+.reader-btn {
+  font-family: 'Lato', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 0.5px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.76);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.reader-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.34); color: rgba(255,255,255,0.95); }
+.reader-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.reader-btn.close-reader { border-color: rgba(232,180,192,0.45); color: #e8b4c0; }
+.reader-btn.close-reader:hover { background: rgba(232,180,192,0.1); }
+#reader-prev-btn,
+#reader-next-btn,
+#reader-scroll-up-btn,
+#reader-scroll-down-btn {
+  display: none !important;
+}
+.reader-canvas-wrap {
+  flex: 1;
+  height: 100%;
+  margin-top: 0;
+  padding: 0;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  position: relative;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.reader-canvas {
+  background: #ffffff;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.05);
+  border-radius: 0;
+  max-width: none;
+  max-height: none;
+  height: auto;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.tap-feedback {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transform: scale(0);
+  pointer-events: none;
+  animation: tapRipple 0.4s ease;
+  z-index: 2;
+}
+.reader-touch-hint {
+  animation: hintFloat 0.6s ease;
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  transform: translateX(-50%) translateY(8px);
+  z-index: 1002;
+  border: 0.5px solid rgba(255,255,255,0.22);
+  background: rgba(20, 8, 10, 0.72);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 8px 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.reader-touch-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.backup-bar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 2rem 0 0; padding: 16px 20px; background: var(--cream); border: 0.5px solid var(--blush); border-radius: 16px; }
+.backup-label { font-size: 11px; color: var(--ink3); letter-spacing: 0.12em; text-transform: uppercase; }
+.backup-import { position: relative; }
+.backup-import input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+.sync-card {
+  margin: 2rem 0 0;
+  padding: 18px 20px;
+  background: var(--cream);
+  border: 0.5px solid var(--blush);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px var(--shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.sync-card:hover {
+  border-color: #ddb1bf;
+  box-shadow: 0 10px 28px rgba(139,74,94,0.18), 0 0 0 1px rgba(196,118,138,0.18);
+  transform: translateY(-2px);
+}
+.sync-card.collapsed:hover {
+  cursor: pointer;
+  background: #fffaf7;
+}
+.sync-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sync-header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.sync-kicker { font-size: 11px; color: var(--ink3); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.sync-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--petal-deep); font-style: italic; }
+.sync-copy { font-size: 12px; color: var(--ink2); margin-top: 6px; line-height: 1.7; max-width: 620px; }
+.sync-status { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; border: 0.5px solid var(--blush); color: var(--ink3); background: #fffaf6; }
+.sync-status.ok { color: var(--sage-dark); border-color: #a8c8a0; background: #eef8ed; }
+.sync-status.warn { color: #8a6430; border-color: #e3cfaa; background: #fff8ea; }
+.sync-status.error { color: #b07070; border-color: #e8c0c0; background: #fff3f3; }
+.sync-collapse-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; border: 0.5px solid var(--blush); background: #fffaf6; color: var(--ink3); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.sync-collapse-btn:hover { background: #fef2f6; border-color: #ddb1bf; color: var(--petal-deep); }
+.sync-collapse-btn .sync-chevron { font-size: 10px; line-height: 1; transition: transform 0.2s ease; }
+.sync-card.collapsed .sync-collapse-btn .sync-chevron { transform: rotate(180deg); }
+.sync-body { overflow: hidden; max-height: 1800px; opacity: 1; transition: max-height 0.28s ease, opacity 0.22s ease; }
+.sync-card.collapsed .sync-body { max-height: 0; opacity: 0; pointer-events: none; }
+.sync-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 16px; }
+.sync-field label { display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+.sync-field input { width: 100%; font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 300; padding: 10px 12px; border: 0.5px solid var(--blush); border-radius: 10px; background: var(--bg); color: var(--ink); outline: none; }
+.sync-field input:focus { border-color: var(--petal-dark); }
+.sync-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+.sync-note { margin-top: 12px; font-size: 12px; color: var(--ink3); line-height: 1.65; }
+.sync-note code { color: var(--petal-deep); }
+.sync-user { margin-top: 10px; font-size: 12px; color: var(--ink2); font-style: italic; }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--petal-deep); color: #fff8f2; font-size: 13px; font-family: 'Playfair Display', serif; font-style: italic; padding: 10px 24px; border-radius: 30px; z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.page-footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 0.5px solid var(--blush); font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: var(--ink3); letter-spacing: 0.06em; }
+.page-footer span { display: block; margin-top: 4px; font-size: 16px; letter-spacing: 6px; opacity: 0.5; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--petal); border-radius: 10px; }
+
+.undo-banner { position: fixed; left: 50%; bottom: 5.4rem; transform: translateX(-50%) translateY(10px); z-index: 998; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px; border: 0.5px solid var(--blush); background: #fffaf6; box-shadow: 0 10px 26px var(--shadow); opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+.undo-banner.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.undo-banner #undo-text { font-size: 12px; color: var(--ink2); }
+.undo-btn, .undo-close { border: 0.5px solid var(--petal); background: transparent; color: var(--petal-deep); border-radius: 999px; padding: 6px 11px; cursor: pointer; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.undo-btn:hover, .undo-close:hover { background: #fceef2; }
+.progress-wrap { margin: 8px 0 9px; }
+.progress-label { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); margin-bottom: 4px; }
+.progress-track { width: 100%; height: 4px; border-radius: 999px; background: rgba(139,74,94,0.16); overflow: hidden; }
+.progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c5768c, #8b4a5e); }
+@media (max-width: 760px) {
+  #app { padding: 0 0.75rem 3.2rem; }
+  .header { padding-top: 2.1rem; }
+  .header h1 { font-size: 33px; }
+  .toolbar { gap: 6px; margin: 1.2rem 0 1rem; }
+  .toolbar .search-wrap { min-width: 100%; }
+  .toolbar select, .toolbar .btn { flex: 1 1 calc(50% - 6px); min-width: 140px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .card-body { padding: 9px 10px 10px; }
+  .modal { max-width: 96vw; padding: 1.1rem 0.95rem; border-radius: 14px; }
+  .reader-bar { gap: 7px; padding: 9px; }
+  .reader-btn { font-size: 10px; padding: 6px 10px; }
+  .reader-canvas-wrap { padding: 102px 10px 16px; }
+  .sync-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px), (pointer: coarse), (hover: none) and (pointer: coarse) {
+  .grid { gap: 10px; }
+  .reader-bar {
+    width: calc(100% - 16px);
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px 10px;
+    gap: 6px;
+  }
+  .reader-bar .reader-title {
+    flex-basis: 100%;
+    min-width: 0;
+    font-size: 14px;
+  }
+  .reader-meta,
+  .reader-zoom-meta {
+    font-size: 10px;
+  }
+  .reader-btn {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  #reader-prev-btn,
+  #reader-next-btn,
+  #reader-scroll-up-btn,
+  #reader-scroll-down-btn {
+    display: none !important;
+  }
+  .reader-canvas-wrap {
+    padding: 0;
+    margin-top: 0;
+    justify-content: center;
+  }
+  .reader-canvas { box-shadow: none; max-width: none; max-height: none; }
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes tapRipple { to { transform: scale(6); opacity: 0; } }
+@keyframes hintFloat { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <span class="header-ornament">✦ ❀ ✦ ❀ ✦</span>
+    <h1>Devika's <em>Little</em> Library</h1>
+    <p class="dedication">a home for every story she has ever loved</p>
+    <span class="header-rule"></span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-item"><span class="stat-num" id="s-total">0</span><span class="stat-label">Books</span></div>
+    <div class="stat-item"><span class="stat-num" id="s-read">0</span><span class="stat-label">Read</span></div>
+    <div class="stat-item"><span class="stat-num" id="s-reading">0</span><span class="stat-label">Reading</span></div>
+    <div class="stat-item"><span class="stat-num" id="s-unread">0</span><span class="stat-label">Unread</span></div>
+    <div class="stat-item"><span class="stat-num" id="s-pdfs">0</span><span class="stat-label">PDFs</span></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" id="search" placeholder="Search your library..." oninput="render()">
+    </div>
+    <select id="filter-status" onchange="render()">
+      <option value="">All status</option>
+      <option value="read">Finished</option>
+      <option value="reading">Reading</option>
+      <option value="unread">Unread</option>
+    </select>
+
+    <select id="sort-books" onchange="render()">
+      <option value="added-desc">Recently added</option>
+      <option value="opened-desc">Recently opened</option>
+      <option value="title-asc">Title A-Z</option>
+      <option value="status">Status</option>
+      <option value="size-desc">File size</option>
+    </select>
+    <button class="btn btn-primary" id="btn-add-book" onclick="openAdd()">✦ Add book</button>
+    <button class="btn btn-lav" id="btn-batch-add" onclick="openBatchAdd()">Add batch</button>
+    <button class="btn btn-danger" id="btn-batch-delete-toggle" onclick="toggleBatchDeleteMode()">Batch delete</button>
+    <button class="btn btn-danger" id="btn-batch-delete-confirm" onclick="deleteSelectedBooks()" style="display:none">Delete selected (0)</button>
+    <button class="btn btn-ghost" id="btn-batch-delete-cancel" onclick="cancelBatchDelete()" style="display:none">Cancel</button>
+  </div>
+
+  <div class="library-section" id="reading-section" style="display:none">
+    <div class="section-title">Currently reading</div>
+    <div class="grid" id="reading-grid"></div>
+  </div>
+
+  <div class="library-section" id="all-books-section">
+    <div class="section-title">All books</div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="sync-card" id="sync-card" onclick="onSyncCardClick(event)">
+    <div class="sync-header">
+      <div>
+        <span class="sync-kicker">Cloud library</span>
+        <div class="sync-title">Permanent sync across devices</div>
+        <p class="sync-copy" id="sync-copy-text">Sign in once and keep this library safe in cloud storage, not only in one browser.</p>
+      </div>
+      <div class="sync-header-right">
+        <span class="sync-status" id="sync-status-pill">Local only</span>
+        <button class="sync-collapse-btn" id="sync-toggle-btn" onclick="toggleSyncPanel()" aria-expanded="true">
+          <span id="sync-toggle-label">Hide cloud setup</span>
+          <span class="sync-chevron">▾</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sync-body" id="sync-body">
+    <div class="sync-grid">
+      <div class="sync-field">
+        <label>Email</label>
+        <input id="auth-email" type="email" placeholder="you@example.com">
+      </div>
+      <div class="sync-field">
+        <label>Password</label>
+        <input id="auth-password" type="password" placeholder="Strong password">
+      </div>
+    </div>
+
+    <div class="sync-actions">
+      <button class="btn btn-lav" onclick="signUp()" id="btn-signup">Create account</button>
+      <button class="btn btn-sage" onclick="signIn()" id="btn-signin">Sign in</button>
+      <button class="btn btn-ghost" onclick="pullFromCloud()" id="btn-pull" style="display:none">Pull cloud copy</button>
+      <button class="btn btn-primary" onclick="syncToCloud(false)" id="btn-sync" style="display:none">Sync now (optional)</button>
+      <button class="btn btn-danger" onclick="signOutCloud()" id="btn-signout" style="display:none">Sign out</button>
+      <button class="btn btn-ghost" onclick="copyRlsSql()">Copy RLS SQL</button>
+    </div>
+
+    <div class="backup-bar" style="margin-top:14px">
+      <span class="backup-label">Manual backup</span>
+      <button class="btn btn-sage" onclick="exportBackup()">⬇ Save backup</button>
+      <div class="backup-import">
+        <button class="btn btn-lav">⬆ Restore backup</button>
+        <input type="file" accept=".json" onchange="importBackup(event)">
+      </div>
+    </div>
+
+    <div class="sync-user" id="sync-user">Not signed in yet.</div>
+    <p class="sync-note">Sign in once with email and password. Your library syncs privately in cloud storage in the background.</p>
+    </div>
+  </div>
+
+
+  <div class="page-footer">
+    for all the stories that matter to her, always - Jean
+    <span>✿ ✾ ✿</span>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div id="modal-bg" class="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-floral">✿ ✾ ✿</span>
+      <h2 id="modal-title">Add a new book</h2>
+    </div>
+    <div class="field"><label>Title</label><input id="f-title" type="text" placeholder="The book's title..."></div>
+    <div class="field"><label>Author</label><input id="f-author" type="text" placeholder="Written by..."></div>
+    <div class="field">
+      <label>PDF file</label>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" accept="application/pdf" id="pdf-input" onchange="handlePdfUpload(event)">
+        <span class="uz-icon">📄</span>
+        <div class="uz-text">Drop your PDF here, or click to browse</div>
+        <div class="uz-sub">Stored safely in your library (and cloud if connected) · max 50 MB</div>
+      </div>
+      <div class="pdf-attached" id="pdf-attached" style="display:none">
+        <span class="pdf-icon">📄</span>
+        <span class="pdf-name" id="pdf-name">—</span>
+        <span class="pdf-size" id="pdf-size"></span>
+        <button onclick="removePdf(event)">✕</button>
+      </div>
+      <div class="upload-inline-status" id="upload-inline-status"></div>
+    </div>
+    <div class="field"><label>Cover image URL (optional)</label><input id="f-cover" type="text" placeholder="Paste a link to a cover image..."></div>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink2);">
+        <input type="checkbox" id="f-pdf-cover" style="width:15px;height:15px;accent-color:var(--petal-dark);cursor:pointer;flex-shrink:0;">
+        Use the first page of the PDF as cover <span style="font-size:10px;color:var(--ink3);margin-left:2px;">(auto-generated)</span>
+      </label>
+    </div>
+    <div class="field">
+      <label>Cover colour (when no image)</label>
+      <div class="palette-row" id="palette"></div>
+    </div>
+
+    <div class="field"><label>Genre</label><input id="f-genre" type="text" placeholder="Romance, Fantasy, Mystery..."></div>
+    <div class="field"><label>Shelf / collection</label><input id="f-shelf" type="text" placeholder="Semester 6, Favorites, To revise..."></div>
+    <div class="field"><label>Reading status</label>
+      <select id="f-status">
+        <option value="unread">Unread</option>
+        <option value="reading">Currently reading</option>
+        <option value="read">Finished</option>
+      </select>
+    </div>
+    <div class="field"><label>Notes & thoughts</label><textarea id="f-notes" placeholder="What did you love about it?..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="btn-delete" style="display:none" onclick="deleteBook()">Remove</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-book" onclick="saveBook()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Add Modal -->
+<div id="batch-add-bg" class="overlay" style="display:none" onclick="if(event.target===this)closeBatchAdd()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-floral">✿ ✾ ✿</span>
+      <h2>Add PDFs in batch</h2>
+    </div>
+
+    <div class="field">
+      <label>PDF files</label>
+      <div class="upload-zone" id="batch-upload-zone">
+        <input type="file" accept="application/pdf" id="batch-pdf-input" multiple onchange="handleBatchPdfSelection(event)">
+        <span class="uz-icon">📚</span>
+        <div class="uz-text">Select multiple PDF files</div>
+        <div class="uz-sub">Titles are auto-created from file names · first page becomes cover</div>
+      </div>
+      <div class="batch-file-list" id="batch-file-list"></div>
+    </div>
+
+    <div class="field"><label>Default author (optional)</label><input id="batch-author" type="text" placeholder="Written by..."></div>
+    <div class="field"><label>Default genre (optional)</label><input id="batch-genre" type="text" placeholder="Romance, Fantasy, Mystery..."></div>
+    <div class="field"><label>Default shelf (optional)</label><input id="batch-shelf" type="text" placeholder="Semester 6, Favorites, To revise..."></div>
+    <div class="field"><label>Default status</label>
+      <select id="batch-status">
+        <option value="unread">Unread</option>
+        <option value="reading">Currently reading</option>
+        <option value="read">Finished</option>
+      </select>
+    </div>
+
+    <p style="font-size:12px;color:var(--ink3);line-height:1.7;margin-top:-2px">
+      No manual title entry needed. We auto-use file names, set first-page cover, and apply your green theme style.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeBatchAdd()">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-batch" onclick="saveBatchAdd()">Add books</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detail-bg" class="overlay" style="display:none" onclick="if(event.target===this)closeDetail()">
+  <div class="modal modal-wide">
+    <div class="detail-cover" id="d-cover"></div>
+    <div class="detail-title" id="d-title"></div>
+    <div class="detail-author" id="d-author"></div>
+    <div class="detail-pills" id="d-pills"></div>
+    <div class="detail-status-row" id="d-status-row"></div>
+    <div class="detail-pdf-row" id="d-pdf-row"></div>
+    <hr class="detail-divider">
+    <div class="detail-notes-label">Notes & thoughts</div>
+    <div class="detail-notes" id="d-notes"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDetail()">Close</button>
+      <button class="btn btn-primary" id="d-edit-btn">Edit book</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Reader -->
+<div id="reader-overlay" class="reader-overlay" style="display:none">
+  <div class="reader-bar" id="reader-bar">
+    <span class="reader-title" id="reader-title">Reading...</span>
+    <span class="reader-meta" id="reader-page-meta">Page 1 / 1</span>
+    <span class="reader-zoom-meta" id="reader-zoom-meta">100%</span>
+    <button class="reader-btn" id="reader-prev-btn">← Prev</button>
+    <button class="reader-btn" id="reader-next-btn">Next →</button>
+    <button class="reader-btn" id="reader-scroll-up-btn">↑ Up</button>
+    <button class="reader-btn" id="reader-scroll-down-btn">↓ Down</button>
+    <button class="reader-btn" id="reader-zoom-out-btn">− Zoom</button>
+    <button class="reader-btn" id="reader-zoom-in-btn">+ Zoom</button>
+    <button class="reader-btn" id="reader-fit-btn">Fit</button>
+    <button class="reader-btn" id="reader-fs-btn">⤢ Full screen</button>
+    <button class="reader-btn" id="reader-open-btn">↗ Open in tab</button>
+    <button class="reader-btn" id="reader-dl-btn">⬇ Download</button>
+    <button class="reader-btn close-reader" onclick="closeReader()">✕ Close reader</button>
+  </div>
+  <div class="reader-touch-hint" id="reader-touch-hint">Tap center to open controls</div>
+  <div class="reader-canvas-wrap" id="reader-canvas-wrap">
+    <canvas id="reader-canvas" class="reader-canvas"></canvas>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="undo-banner" id="undo-banner">
+  <span id="undo-text">Book deleted.</span>
+  <button class="undo-btn" type="button" onclick="undoLastDelete()">Undo</button>
+  <button class="undo-close" type="button" onclick="dismissUndoDelete()">✕</button>
+</div>
+
+<div id="sync-conflict-bg" class="overlay" style="display:none" onclick="if(event.target===this)closeSyncConflictModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-floral">✿ ✾ ✿</span>
+      <h2>Cloud conflict detected</h2>
+    </div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.7" id="sync-conflict-msg">Local and cloud both changed. Choose how to continue.</p>
+    <div class="modal-actions" style="justify-content:flex-start">
+      <button class="btn btn-primary" onclick="resolveSyncConflict('newest')">Use newest (recommended)</button>
+      <button class="btn btn-lav" onclick="resolveSyncConflict('merge')">Merge both</button>
+      <button class="btn btn-ghost" onclick="resolveSyncConflict('local')">Keep this device</button>
+      <button class="btn btn-sage" onclick="resolveSyncConflict('cloud')">Use cloud copy</button>
+      <button class="btn btn-danger" onclick="closeSyncConflictModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PALETTES = [
+  {bg:'#f5d9e0',fg:'#8b4a5e',icon:'🌸'},{bg:'#d4c8e8',fg:'#5a3d8a',icon:'🪷'},
+  {bg:'#c8dfc4',fg:'#3d6b40',icon:'🌿'},{bg:'#f0e3cc',fg:'#8a6430',icon:'📜'},
+  {bg:'#c8dff0',fg:'#2e5a7a',icon:'🌊'},{bg:'#f0d4c8',fg:'#8a4a30',icon:'🍂'},
+  {bg:'#e0cdd4',fg:'#6b3d4f',icon:'🌹'},{bg:'#d4e8e0',fg:'#2d6b56',icon:'🌱'},
+];
+
+const LEGACY_LOCAL_KEY = 'devika_lib_v3';
+const LOCAL_CACHE_KEY = 'devika_lib_cloud_cache_v1';
+const CLOUD_SETTINGS_KEY = 'devika_lib_supabase_settings_v1';
+const SYNC_PANEL_KEY = 'devika_lib_sync_panel_v1';
+const DEFAULT_CLOUD_URL = 'https://bdmamauvwuajnpanqvqv.supabase.co';
+const DEFAULT_CLOUD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkbWFtYXV2d3Vham5wYW5xdnF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MTM0NzAsImV4cCI6MjA5MDE4OTQ3MH0.TeUtx5cg88-UeHxSD4XZHBa50YvUBNmkTVkq5wDvpH0';
+const DEFAULT_CLOUD_BUCKET = 'devikas-library';
+const CLOUD_FILE = 'library.json';
+const AUTO_SYNC_DEBOUNCE_MS = 160;
+const AUTO_SYNC_HEARTBEAT_MS = 9000;
+const CLOUD_SETTINGS_APPLY_DEBOUNCE_MS = 700;
+const AUTH_STORAGE_KEY = 'devika_lib_supabase_auth_v1';
+const AUTH_SESSION_KEY = 'devika_lib_supabase_session_v1';
+const READER_WHEEL_PAGE_DELTA = 260;
+const READER_KEY_SCROLL_FACTOR = 0.5;
+const READER_MAX_RENDER_DPR = 2.2;
+const READER_CHROME_HIDE_MS = 2600;
+const READER_CHROME_HOVER_REGION_PX = 108;
+const READER_HIDE_GRACE_MS = 1300;
+const READER_TOUCH_SWIPE_DETECT_PX = 10;
+const READER_TOUCH_SWIPE_NAV_PX = 50;
+const READER_TOUCH_HINT_KEY = 'devika_reader_touch_hint_v1';
+const BATCH_DEFAULT_PALETTE = 2;
+const UNDO_DELETE_WINDOW_MS = 8000;
+
+let books = [];
+let libraryUpdatedAt = null;
+let libraryOwnerId = null;
+let editId = null;
+let selPal = 0;
+let pendingPdfFile = null;
+let pendingPdfName = null;
+let pendingPdfSize = null;
+let pendingPdfCover = null;
+let pendingPdfRemoved = false;
+let uploadInFlight = false;
+let batchDeleteMode = false;
+let selectedBookIds = new Set();
+let pendingBatchFiles = [];
+
+let supabaseClient = null;
+let currentUser = null;
+let authSubscription = null;
+let syncInFlight = false;
+let syncQueued = false;
+let readerBlobUrl = null;
+let cloudDirty = false;
+let autoSyncDebounceTimer = null;
+let autoSyncHeartbeat = null;
+let cloudSettingsApplyTimer = null;
+let lastAppliedCloudSettingsSig = '';
+let undoDeleteSnapshot = null;
+let undoDeleteTimer = null;
+let pendingSyncConflict = null;
+let legacyPdfMigrationRunning = false;
+let lastSyncedPayloadSig = '';
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+
+function setBookSaveLoading(isLoading, message = '') {
+  uploadInFlight = !!isLoading;
+  const saveBtn = document.getElementById('btn-save-book');
+  const status = document.getElementById('upload-inline-status');
+  if(saveBtn) {
+    saveBtn.disabled = uploadInFlight;
+    saveBtn.textContent = uploadInFlight ? 'Saving...' : 'Save';
+  }
+  if(status) {
+    status.textContent = uploadInFlight ? (message || 'Processing...') : '';
+  }
+}
+
+function currentPayloadSignature() {
+  try {
+    return JSON.stringify(libraryPayload());
+  } catch(e) {
+    return '';
+  }
+}
+
+function normalizeBooks(input) {
+  if(!Array.isArray(input)) return [];
+  return input.map((book, index) => {
+    const createdAt = book.createdAt || (book.id ? new Date(Number(String(book.id).split('_')[0]) || Date.now()).toISOString() : new Date().toISOString());
+    const total = Number(book.pdfTotalPages || 0);
+    const last = Number(book.lastReadPage || 0);
+    return {
+      id: book.id ?? `${Date.now()}_${index}`,
+      title: book.title || '',
+      author: book.author || '',
+      cover: book.cover || '',
+      genre: book.genre || '',
+      shelf: book.shelf || '',
+      status: book.status || 'unread',
+      notes: book.notes || '',
+      pal: Number.isFinite(book.pal) ? book.pal : 0,
+      createdAt,
+      lastOpenedAt: book.lastOpenedAt || null,
+      lastReadAt: book.lastReadAt || null,
+      lastReadPage: Number.isFinite(last) ? Math.max(0, Math.floor(last)) : 0,
+      pdfTotalPages: Number.isFinite(total) ? Math.max(0, Math.floor(total)) : 0,
+      pdfPath: book.pdfPath || null,
+      pdfUrl: book.pdfUrl || null,
+      legacyPdfData: book.legacyPdfData || book.pdfData || null,
+      pdfName: book.pdfName || null,
+      pdfSize: book.pdfSize || null,
+      usePdfCover: !!book.usePdfCover,
+      pdfCover: book.pdfCover || null,
+    };
+  });
+}
+
+function serializableBooks() {
+  return books.map(b => ({
+    id: b.id,
+    title: b.title,
+    author: b.author,
+    cover: b.cover,
+    genre: b.genre,
+    shelf: b.shelf,
+    status: b.status,
+    notes: b.notes,
+    pal: b.pal,
+    createdAt: b.createdAt,
+    lastOpenedAt: b.lastOpenedAt,
+    lastReadAt: b.lastReadAt,
+    lastReadPage: b.lastReadPage,
+    pdfTotalPages: b.pdfTotalPages,
+    pdfPath: b.pdfPath || null,
+    pdfUrl: b.pdfUrl || null,
+    pdfName: b.pdfName || null,
+    pdfSize: b.pdfSize || null,
+    usePdfCover: !!b.usePdfCover,
+    pdfCover: b.pdfCover || null,
+  }));
+}
+
+function libraryPayload() {
+  return {
+    version: 5,
+    updatedAt: libraryUpdatedAt || new Date().toISOString(),
+    ownerId: libraryOwnerId || null,
+    books: serializableBooks(),
+  };
+}
+
+function safeTime(value) {
+  const t = Date.parse(value || '');
+  return Number.isFinite(t) ? t : 0;
+}
+
+function markLibraryChanged() {
+  libraryUpdatedAt = new Date().toISOString();
+}
+
+function claimLibraryForCurrentUser() {
+  if(currentUser?.id) libraryOwnerId = currentUser.id;
+}
+
+function clearInMemoryLibraryView() {
+  books = [];
+  libraryUpdatedAt = null;
+  cloudDirty = false;
+  lastSyncedPayloadSig = '';
+  selectedBookIds.clear();
+  batchDeleteMode = false;
+}
+
+function clearPersistedLocalLibrary() {
+  localStorage.removeItem(LOCAL_CACHE_KEY);
+  localStorage.removeItem(LEGACY_LOCAL_KEY);
+  libraryOwnerId = null;
+}
+
+function hardLocalSignOutCleanup() {
+  currentUser = null;
+  clearRememberedAuthSession();
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  localStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+  clearPersistedLocalLibrary();
+  clearInMemoryLibraryView();
+  closeDetail();
+  closeModal();
+  closeBatchAdd();
+  updateBatchDeleteUi();
+  render();
+  refreshSyncUI();
+  syncPanelFromAuthState();
+}
+
+function saveLocalCache() {
+  try {
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(libraryPayload()));
+    localStorage.setItem(LEGACY_LOCAL_KEY, JSON.stringify(serializableBooks()));
+  } catch(e) {}
+}
+
+function loadLocalCache() {
+  try {
+    const cloudCache = localStorage.getItem(LOCAL_CACHE_KEY);
+    if(cloudCache) {
+      const parsed = JSON.parse(cloudCache);
+      books = normalizeBooks(parsed.books);
+      libraryUpdatedAt = parsed.updatedAt || null;
+      libraryOwnerId = parsed.ownerId || null;
+      saveLocalCache();
+      return;
+    }
+    const legacy = localStorage.getItem(LEGACY_LOCAL_KEY);
+    if(legacy) {
+      books = normalizeBooks(JSON.parse(legacy));
+      libraryUpdatedAt = new Date().toISOString();
+      libraryOwnerId = null;
+      saveLocalCache();
+    }
+  } catch(e) {}
+}
+
+function setSyncStatus(label, tone) {
+  const el = document.getElementById('sync-status-pill');
+  if(!el) return;
+  el.textContent = label;
+  el.className = 'sync-status' + (tone ? ` ${tone}` : '');
+}
+
+function refreshSyncUI() {
+  const signedIn = !!currentUser;
+  const signup = document.getElementById('btn-signup');
+  const signin = document.getElementById('btn-signin');
+  const pull = document.getElementById('btn-pull');
+  const sync = document.getElementById('btn-sync');
+  const signout = document.getElementById('btn-signout');
+  if(signup) signup.style.display = signedIn ? 'none' : 'inline-block';
+  if(signin) signin.style.display = signedIn ? 'none' : 'inline-block';
+  if(pull) {
+    pull.style.display = signedIn ? 'inline-block' : 'none';
+    pull.disabled = syncInFlight;
+  }
+  if(sync) {
+    sync.style.display = signedIn ? 'inline-block' : 'none';
+    sync.disabled = syncInFlight;
+    sync.textContent = syncInFlight ? 'Syncing...' : 'Sync now (optional)';
+  }
+  if(signout) {
+    signout.style.display = signedIn ? 'inline-block' : 'none';
+    signout.disabled = syncInFlight;
+  }
+
+  const syncUser = document.getElementById('sync-user');
+  if(syncUser) {
+    syncUser.textContent = signedIn
+      ? `Signed in as ${currentUser.email || 'your account'}. Changes auto-sync to cloud in the background.`
+      : 'Not signed in yet.';
+  }
+
+  if(signedIn) {
+    setSyncStatus(syncInFlight ? 'Syncing...' : 'Cloud connected', syncInFlight ? 'warn' : 'ok');
+  } else if(supabaseClient) {
+    setSyncStatus('Ready to sign in', 'warn');
+  } else {
+    setSyncStatus('Local only', '');
+  }
+}
+
+function readCloudSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(CLOUD_SETTINGS_KEY) || 'null');
+  } catch(e) {
+    return null;
+  }
+}
+
+function readRememberedAuthSession() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_SESSION_KEY) || 'null');
+  } catch(e) {
+    return null;
+  }
+}
+
+function saveRememberedAuthSession(session) {
+  if(!session?.access_token || !session?.refresh_token) return;
+  const payload = {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: session.expires_at || null,
+  };
+  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(payload));
+}
+
+function clearRememberedAuthSession() {
+  localStorage.removeItem(AUTH_SESSION_KEY);
+}
+
+function fillCloudSettingsForm() {
+  const settings = readCloudSettings();
+  const url = document.getElementById('cloud-url');
+  const key = document.getElementById('cloud-key');
+  const bucket = document.getElementById('cloud-bucket');
+  if(url) url.value = '';
+  if(key) key.value = '';
+  if(bucket) bucket.value = settings?.bucket || DEFAULT_CLOUD_BUCKET;
+}
+function updateSyncCopyText() {
+  const copy = document.getElementById('sync-copy-text');
+  const card = document.getElementById('sync-card');
+  if(!copy) return;
+  const signedIn = !!currentUser;
+  const collapsed = !!card?.classList.contains('collapsed');
+  if(signedIn && collapsed) {
+    copy.textContent = `Connected as ${currentUser.email || 'your account'}.`;
+    return;
+  }
+  copy.textContent = 'Sign in once and keep this library safe in cloud storage, not only in one browser.';
+}
+
+function applySyncPanelState(collapsed, persist = true) {
+  const card = document.getElementById('sync-card');
+  const toggle = document.getElementById('sync-toggle-btn');
+  const label = document.getElementById('sync-toggle-label');
+  if(!card || !toggle || !label) return;
+  const isCollapsed = !!collapsed;
+  card.classList.toggle('collapsed', isCollapsed);
+  toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+  label.textContent = isCollapsed ? 'Show cloud setup' : 'Hide cloud setup';
+  if(persist) localStorage.setItem(SYNC_PANEL_KEY, isCollapsed ? '1' : '0');
+  updateSyncCopyText();
+}
+
+function syncPanelFromAuthState() {
+  applySyncPanelState(!!currentUser, false);
+}
+
+function toggleSyncPanel() {
+  const card = document.getElementById('sync-card');
+  if(!card) return;
+  applySyncPanelState(!card.classList.contains('collapsed'), true);
+}
+
+function onSyncCardClick(event) {
+  const card = document.getElementById('sync-card');
+  if(!card || !card.classList.contains('collapsed')) return;
+  if(event?.target?.closest('button, input, select, textarea, a, .sync-collapse-btn')) return;
+  applySyncPanelState(false, true);
+}
+
+function collapseSyncPanelOnOutsideClick(event) {
+  const card = document.getElementById('sync-card');
+  if(!card || card.classList.contains('collapsed')) return;
+  if(event?.target?.closest('#sync-card')) return;
+  applySyncPanelState(true, true);
+}
+
+function initSyncPanelState() {
+  applySyncPanelState(false, false);
+}
+
+async function initSupabaseFromSettings(settings) {
+  if(!settings?.url || !settings?.key) {
+    supabaseClient = null;
+    currentUser = null;
+    refreshSyncUI();
+    syncPanelFromAuthState();
+    return false;
+  }
+  if(!window.supabase?.createClient) {
+    setSyncStatus('Supabase failed to load', 'error');
+    return false;
+  }
+
+  if(authSubscription?.data?.subscription?.unsubscribe) {
+    authSubscription.data.subscription.unsubscribe();
+  }
+
+  supabaseClient = window.supabase.createClient(settings.url, settings.key, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: AUTH_STORAGE_KEY,
+    },
+  });
+
+  authSubscription = supabaseClient.auth.onAuthStateChange((event, session) => {
+    currentUser = session?.user || null;
+    if(session?.access_token && session?.refresh_token) {
+      saveRememberedAuthSession(session);
+      claimLibraryForCurrentUser();
+    } else if(event === 'SIGNED_OUT') {
+      hardLocalSignOutCleanup();
+    }
+    refreshSyncUI();
+    syncPanelFromAuthState();
+    if(currentUser && cloudDirty) queueCloudSync(true);
+  });
+
+  const { data, error } = await supabaseClient.auth.getSession();
+  if(error) {
+    setSyncStatus('Auth unavailable', 'error');
+    return false;
+  }
+
+  let session = data.session || null;
+  if(!session) {
+    const remembered = readRememberedAuthSession();
+    if(remembered?.access_token && remembered?.refresh_token) {
+      const { data: restored, error: restoreError } = await supabaseClient.auth.setSession({
+        access_token: remembered.access_token,
+        refresh_token: remembered.refresh_token,
+      });
+      if(!restoreError) {
+        session = restored.session || null;
+        if(session) saveRememberedAuthSession(session);
+      } else {
+        clearRememberedAuthSession();
+      }
+    }
+  }
+
+  currentUser = session?.user || null;
+  if(session) saveRememberedAuthSession(session);
+  refreshSyncUI();
+  syncPanelFromAuthState();
+  return true;
+}
+
+function settingsFromForm() {
+  return {
+    url: DEFAULT_CLOUD_URL,
+    key: DEFAULT_CLOUD_KEY,
+    bucket: DEFAULT_CLOUD_BUCKET,
+  };
+}
+
+function cloudSettingsSignature(settings) {
+  return `${settings?.url || ''}|${settings?.key || ''}`;
+}
+
+function persistCloudSettingsDraft() {
+  const s = settingsFromForm();
+  localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(s));
+  return s;
+}
+
+async function applyCloudSettingsFromForm(options = {}) {
+  const silent = options.silent !== false;
+  const force = !!options.force;
+  const s = persistCloudSettingsDraft();
+
+  if(!s.url || !s.key) {
+    if(!silent) toast('Cloud setup is not available right now.');
+    lastAppliedCloudSettingsSig = '';
+    supabaseClient = null;
+    currentUser = null;
+    refreshSyncUI();
+    return false;
+  }
+
+  const sig = cloudSettingsSignature(s);
+  if(!force && sig === lastAppliedCloudSettingsSig && !!supabaseClient) {
+    return true;
+  }
+
+  const ok = await initSupabaseFromSettings(s);
+  if(ok) lastAppliedCloudSettingsSig = sig;
+  return !!ok;
+}
+
+function scheduleCloudSettingsApply() {
+  if(cloudSettingsApplyTimer) clearTimeout(cloudSettingsApplyTimer);
+  cloudSettingsApplyTimer = setTimeout(() => {
+    cloudSettingsApplyTimer = null;
+    applyCloudSettingsFromForm({ silent: true });
+  }, CLOUD_SETTINGS_APPLY_DEBOUNCE_MS);
+}
+
+function bindCloudSettingsAutoApply() {
+  ['cloud-url', 'cloud-key', 'cloud-bucket'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', () => {
+      persistCloudSettingsDraft();
+      scheduleCloudSettingsApply();
+    });
+    el.addEventListener('change', () => {
+      persistCloudSettingsDraft();
+      scheduleCloudSettingsApply();
+    });
+  });
+}
+
+async function ensureClientFromForm(_persist) {
+  const s = settingsFromForm();
+  if(!s.url || !s.key) {
+    toast('Cloud setup is not available right now.');
+    return false;
+  }
+  const ok = await applyCloudSettingsFromForm({ silent: true, force: true });
+  return !!ok;
+}
+
+function friendlyAuthError(err) {
+  const msg = (err?.message || '').toLowerCase();
+  if(msg.includes('invalid api key')) {
+    return 'Cloud connection key is invalid. Please contact the app owner.';
+  }
+  if(msg.includes('email not confirmed')) {
+    return 'Email not confirmed. Confirm from inbox (or confirm user in Supabase Auth Users) and sign in again.';
+  }
+  if(msg.includes('email rate limit')) {
+    return 'Email limit exceeded. Confirm the user manually in Supabase Auth Users, then sign in.';
+  }
+  return err?.message || 'Authentication failed.';
+}
+function currentBucket() {
+  return DEFAULT_CLOUD_BUCKET;
+}
+
+function friendlyCloudError(err) {
+  const msg = (err?.message || '').toLowerCase();
+  if(msg.includes('invalid api key')) return 'Cloud connection key is invalid. Please contact the app owner.';
+  if(msg.includes('bucket not found')) return `Bucket not found: "${currentBucket()}". Use the exact bucket name from Supabase.`;
+  if(msg.includes('row-level security')) return 'Storage policy blocked this action. Add Storage RLS policies for your bucket.';
+  return err?.message || 'Cloud sync failed.';
+}
+
+
+function buildRlsSql(bucketName) {
+  const safeBucket = bucketName.replace(/'/g, "''");
+  return `create policy "read own files"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = '${safeBucket}'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "insert own files"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = '${safeBucket}'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "update own files"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = '${safeBucket}'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = '${safeBucket}'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "delete own files"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = '${safeBucket}'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);`;
+}
+
+async function copyRlsSql() {
+  const bucket = currentBucket();
+  if(!bucket) {
+    toast('Enter the bucket name first.');
+    return;
+  }
+  const sql = buildRlsSql(bucket);
+  try {
+    await navigator.clipboard.writeText(sql);
+    toast('RLS SQL copied. Paste in Supabase SQL Editor and run once.');
+  } catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = sql;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    toast('RLS SQL copied. Paste in Supabase SQL Editor and run once.');
+  }
+}
+function snapshotBooks() {
+  return JSON.parse(JSON.stringify(books));
+}
+
+function showUndoDelete(snapshot, message) {
+  undoDeleteSnapshot = snapshot;
+  const bar = document.getElementById('undo-banner');
+  const text = document.getElementById('undo-text');
+  if(!bar || !text) return;
+  text.textContent = message || 'Deleted.';
+  bar.classList.add('show');
+  if(undoDeleteTimer) clearTimeout(undoDeleteTimer);
+  undoDeleteTimer = setTimeout(() => dismissUndoDelete(), UNDO_DELETE_WINDOW_MS);
+}
+
+function dismissUndoDelete() {
+  const bar = document.getElementById('undo-banner');
+  if(bar) bar.classList.remove('show');
+  undoDeleteSnapshot = null;
+  if(undoDeleteTimer) clearTimeout(undoDeleteTimer);
+  undoDeleteTimer = null;
+}
+
+function undoLastDelete() {
+  if(!undoDeleteSnapshot) return;
+  books = normalizeBooks(undoDeleteSnapshot);
+  dismissUndoDelete();
+  persistLibrary();
+  toast('Delete undone.');
+}
+
+function genres() {
+  return [...new Set(books.map(b => b.genre).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+}
+
+function shelves() {
+  return [...new Set(books.map(b => b.shelf).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+}
+
+function statusRank(status) {
+  if(status === 'reading') return 0;
+  if(status === 'unread') return 1;
+  return 2;
+}
+
+function bookCreatedTime(b) {
+  return safeTime(b.createdAt) || Number(String(b.id || '').split('_')[0]) || 0;
+}
+
+function bookOpenedTime(b) {
+  return safeTime(b.lastOpenedAt) || safeTime(b.lastReadAt) || 0;
+}
+
+function sortBooksList(list, sortBy) {
+  const arr = [...list];
+  if(sortBy === 'title-asc') {
+    arr.sort((a,b) => (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' }));
+    return arr;
+  }
+  if(sortBy === 'status') {
+    arr.sort((a,b) => {
+      const diff = statusRank(a.status) - statusRank(b.status);
+      if(diff !== 0) return diff;
+      return (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
+    });
+    return arr;
+  }
+  if(sortBy === 'size-desc') {
+    arr.sort((a,b) => (Number(b.pdfSize) || 0) - (Number(a.pdfSize) || 0));
+    return arr;
+  }
+  if(sortBy === 'opened-desc') {
+    arr.sort((a,b) => bookOpenedTime(b) - bookOpenedTime(a));
+    return arr;
+  }
+  arr.sort((a,b) => bookCreatedTime(b) - bookCreatedTime(a));
+  return arr;
+}
+
+function booksComparableSignature(list) {
+  return JSON.stringify(
+    [...(list || [])]
+      .map(b => ({
+        id: String(b.id || ''),
+        title: b.title || '',
+        author: b.author || '',
+        genre: b.genre || '',
+        shelf: b.shelf || '',
+        status: b.status || 'unread',
+        notes: b.notes || '',
+        pal: Number.isFinite(b.pal) ? b.pal : 0,
+        pdfName: b.pdfName || '',
+        pdfSize: Number(b.pdfSize) || 0,
+      }))
+      .sort((a,b) => a.id.localeCompare(b.id))
+  );
+}
+
+function booksDiffer(a, b) {
+  return booksComparableSignature(a) !== booksComparableSignature(b);
+}
+
+function mergeBookSets(localBooks, remoteBooks, preferRemote) {
+  const primary = preferRemote ? remoteBooks : localBooks;
+  const secondary = preferRemote ? localBooks : remoteBooks;
+  const map = new Map();
+  const merged = [];
+  for(const book of primary) {
+    const key = String(book.id || '');
+    if(!key) continue;
+    if(!map.has(key)) {
+      map.set(key, true);
+      merged.push(book);
+    }
+  }
+  for(const book of secondary) {
+    const key = String(book.id || '');
+    if(!key) continue;
+    if(!map.has(key)) {
+      map.set(key, true);
+      merged.push(book);
+    }
+  }
+  return normalizeBooks(merged);
+}
+
+function closeSyncConflictModal() {
+  const bg = document.getElementById('sync-conflict-bg');
+  if(bg) bg.style.display = 'none';
+  pendingSyncConflict = null;
+}
+
+function openSyncConflictModal(localPayload, remotePayload) {
+  pendingSyncConflict = { local: localPayload, remote: remotePayload };
+  const bg = document.getElementById('sync-conflict-bg');
+  const msg = document.getElementById('sync-conflict-msg');
+  const localTs = safeTime(localPayload.updatedAt);
+  const remoteTs = safeTime(remotePayload.updatedAt);
+  const newest = remoteTs >= localTs ? 'cloud copy' : 'this device copy';
+  if(msg) msg.textContent = `Local and cloud both changed. Recommended: keep the newest (${newest}), or merge both.`;
+  if(bg) bg.style.display = 'flex';
+}
+
+async function resolveSyncConflict(choice) {
+  if(!pendingSyncConflict) return;
+  const payload = pendingSyncConflict;
+  const localTs = safeTime(payload.local.updatedAt);
+  const remoteTs = safeTime(payload.remote.updatedAt);
+  const preferRemote = remoteTs >= localTs;
+  const finalChoice = choice === 'newest' ? (preferRemote ? 'cloud' : 'local') : choice;
+
+  let nextBooks = [];
+  let nextUpdatedAt = new Date().toISOString();
+  let shouldPushToCloud = false;
+  let msg = 'Conflict resolved.';
+
+  if(finalChoice === 'merge') {
+    nextBooks = mergeBookSets(payload.local.books, payload.remote.books, preferRemote);
+    shouldPushToCloud = true;
+    msg = 'Merged local and cloud copies.';
+  } else if(finalChoice === 'cloud') {
+    nextBooks = normalizeBooks(payload.remote.books || []);
+    nextUpdatedAt = payload.remote.updatedAt || new Date().toISOString();
+    msg = 'Using cloud copy.';
+  } else {
+    nextBooks = normalizeBooks(payload.local.books || []);
+    nextUpdatedAt = payload.local.updatedAt || new Date().toISOString();
+    shouldPushToCloud = true;
+    msg = 'Keeping this device copy.';
+  }
+
+  books = normalizeBooks(nextBooks);
+  libraryUpdatedAt = nextUpdatedAt;
+  if(currentUser?.id) libraryOwnerId = currentUser.id;
+  saveLocalCache();
+  render();
+  closeSyncConflictModal();
+
+  if(shouldPushToCloud) {
+    cloudDirty = true;
+    setSyncStatus('Applying conflict choice...', 'warn');
+    const ok = await syncToCloud(true);
+    if(!ok) {
+      setSyncStatus('Sync failed', 'error');
+      toast('Choice saved locally, but cloud update failed. Please retry sync.');
+      return;
+    }
+    cloudDirty = false;
+    setSyncStatus('Cloud connected', 'ok');
+    toast(msg);
+    return;
+  }
+
+  cloudDirty = false;
+  setSyncStatus('Cloud connected', 'ok');
+  toast(msg);
+}
+
+function buildPalette() {
+  document.getElementById('palette').innerHTML = PALETTES.map((p,i) => `
+    <div class="palette-swatch${i===selPal?' sel':''}"
+      style="background:${p.bg};border-color:${i===selPal?p.fg:'transparent'}"
+      onclick="selPal=${i};buildPalette()" title="${p.icon}"></div>
+  `).join('');
+}
+
+function coverHTML(b, big) {
+  const p = PALETTES[b.pal||0];
+  const phCls = big ? 'detail-cover-ph' : 'cover-placeholder';
+  const iconCls = big ? 'big-icon' : 'ph-icon';
+  const titleCls = big ? 'big-title' : 'ph-title';
+  const ph = `<div class="${phCls}" style="background:${p.bg}">
+    <span class="${iconCls}">${p.icon}</span>
+    <span class="${titleCls}" style="color:${p.fg}">${b.title||''}</span>
+  </div>`;
+  const imgSrc = (b.usePdfCover && b.pdfCover) ? b.pdfCover : b.cover || null;
+  if(imgSrc) {
+    return `<img src="${imgSrc}" alt="${b.title||''}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="${phCls}" style="background:${p.bg};display:none">
+      <span class="${iconCls}">${p.icon}</span><span class="${titleCls}" style="color:${p.fg}">${b.title||''}</span>
+    </div>`;
+  }
+  return ph;
+}
+
+function pillClass(s) { return s==='read' ? 'pill-read' : s==='reading' ? 'pill-reading' : 'pill-unread'; }
+function statusLabel(s) { return s==='read' ? 'Finished' : s==='reading' ? 'Reading' : 'Unread'; }
+function dotClass(s) { return 'dot-' + (s || 'unread'); }
+function fmtSize(bytes) { if(!bytes) return ''; if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB'; return (bytes/1024/1024).toFixed(1) + ' MB'; }
+function normalizeBatchStatus(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if(!raw) return 'unread';
+  if(['read', 'finished', 'finish', 'done', 'complete', 'completed'].includes(raw)) return 'read';
+  if(['reading', 'in progress', 'in-progress', 'current'].includes(raw)) return 'reading';
+  return 'unread';
+}
+
+function normalizeBatchTitle(fileName) {
+  return String(fileName || '')
+    .replace(/\.pdf$/i, '')
+    .replace(/[\-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim() || 'Untitled';
+}
+
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function hasPdfAsset(book) {
+  const pdfUrl = typeof book?.pdfUrl === 'string' ? book.pdfUrl.trim() : '';
+  const pdfPath = typeof book?.pdfPath === 'string' ? book.pdfPath.trim() : '';
+  const legacyPdfData = typeof book?.legacyPdfData === 'string' ? book.legacyPdfData : '';
+  return !!(pdfUrl || pdfPath || legacyPdfData);
+}
+
+function sanitizeFileName(name) {
+  return String(name || 'book.pdf').replace(/[^a-z0-9._-]+/gi, '_');
+}
+
+function dataUrlToBlob(dataUrl) {
+  if(typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) return null;
+  const comma = dataUrl.indexOf(',');
+  if(comma < 0) return null;
+  const header = dataUrl.slice(0, comma);
+  const body = dataUrl.slice(comma + 1);
+  const match = /^data:([^;]+);base64$/i.exec(header);
+  if(!match) return null;
+  try {
+    const binary = atob(body);
+    const bytes = new Uint8Array(binary.length);
+    for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: match[1] || 'application/pdf' });
+  } catch(e) {
+    return null;
+  }
+}
+
+async function uploadPdfFileToCloud(file, bookId) {
+  if(!supabaseClient || !currentUser) {
+    throw new Error('Sign in first to upload PDFs to cloud storage.');
+  }
+  const safeName = sanitizeFileName(file?.name || `${bookId}.pdf`);
+  const path = `${currentUser.id}/books/${bookId}/${Date.now()}_${safeName}`;
+  const bucket = currentBucket();
+  const { error } = await supabaseClient.storage.from(bucket).upload(path, file, {
+    upsert: true,
+    contentType: file?.type || 'application/pdf',
+  });
+  if(error) throw error;
+
+  return {
+    pdfPath: path,
+    pdfUrl: null,
+    pdfName: file?.name || `${bookId}.pdf`,
+    pdfSize: Number(file?.size) || 0,
+  };
+}
+
+async function fetchPdfBlobForBook(book) {
+  if(!book) return null;
+
+  const pdfUrl = typeof book.pdfUrl === 'string' ? book.pdfUrl.trim() : '';
+  if(pdfUrl) {
+    try {
+      const res = await fetch(pdfUrl);
+      if(res.ok) return await res.blob();
+    } catch(e) {}
+  }
+
+  const pdfPath = typeof book.pdfPath === 'string' ? book.pdfPath.trim() : '';
+  if(pdfPath && supabaseClient && currentUser) {
+    try {
+      const { data, error } = await supabaseClient.storage.from(currentBucket()).download(pdfPath);
+      if(!error && data) return data;
+    } catch(e) {}
+  }
+
+  const legacyRaw = typeof book.legacyPdfData === 'string'
+    ? book.legacyPdfData
+    : (typeof book.pdfData === 'string' ? book.pdfData : '');
+  if(legacyRaw) {
+    return dataUrlToBlob(legacyRaw);
+  }
+
+  return null;
+}
+
+async function fetchPdfBytesForBook(book) {
+  const blob = await fetchPdfBlobForBook(book);
+  if(!blob) return null;
+  const ab = await blob.arrayBuffer();
+  return new Uint8Array(ab);
+}
+
+async function resolveReaderPdfSource(book) {
+  if(!book) return null;
+
+  const bytes = await fetchPdfBytesForBook(book);
+  if(bytes) {
+    return { type: 'data', value: bytes };
+  }
+
+  return null;
+}
+
+async function migrateLegacyPdfBooksInBackground() {
+  if(legacyPdfMigrationRunning) return;
+  if(!supabaseClient || !currentUser) return;
+
+  const legacy = books.filter(b => !!(b.legacyPdfData || b.pdfData) && !b.pdfPath && !b.pdfUrl);
+  if(!legacy.length) return;
+
+  legacyPdfMigrationRunning = true;
+  let migrated = 0;
+
+  for(const book of legacy) {
+    try {
+      const blob = dataUrlToBlob(book.legacyPdfData || book.pdfData);
+      if(!blob) continue;
+      const fileName = book.pdfName || `${book.title || 'book'}.pdf`;
+      const file = new File([blob], fileName, { type: 'application/pdf' });
+      const uploaded = await uploadPdfFileToCloud(file, String(book.id));
+      const i = books.findIndex(x => String(x.id) === String(book.id));
+      if(i < 0) continue;
+      books[i].pdfPath = uploaded.pdfPath;
+      books[i].pdfUrl = uploaded.pdfUrl;
+      books[i].pdfName = uploaded.pdfName;
+      books[i].pdfSize = uploaded.pdfSize;
+      books[i].legacyPdfData = null;
+      if(Object.prototype.hasOwnProperty.call(books[i], 'pdfData')) {
+        delete books[i].pdfData;
+      }
+      migrated += 1;
+    } catch(e) {}
+  }
+
+  if(migrated > 0) {
+    markLibraryChanged();
+    saveLocalCache();
+    cloudDirty = true;
+    scheduleAutoSync();
+    render();
+    toast(`Migrated ${migrated} legacy PDF${migrated===1 ? '' : 's'} to cloud storage.`);
+  }
+
+  legacyPdfMigrationRunning = false;
+}
+
+function renderBatchFileList() {
+  const list = document.getElementById('batch-file-list');
+  if(!list) return;
+  if(!pendingBatchFiles.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink3);font-style:italic;">No PDF files selected yet.</div>';
+    return;
+  }
+  list.innerHTML = pendingBatchFiles.map((file, i) => `
+    <div class="batch-file-item">
+      <span class="batch-file-icon">📄</span>
+      <span class="batch-file-name" title="${file.name}">${file.name}</span>
+      <span class="batch-file-size">${fmtSize(file.size)}</span>
+      <button class="batch-file-remove" type="button" onclick="removeBatchPdfAt(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeBatchPdfAt(index) {
+  pendingBatchFiles.splice(index, 1);
+  renderBatchFileList();
+}
+
+function handleBatchPdfSelection(e) {
+  const files = Array.from(e?.target?.files || []).filter(f => f && (f.type === 'application/pdf' || /\\.pdf$/i.test(f.name || '')));
+  if(!files.length) return;
+
+  const existing = new Set(pendingBatchFiles.map(f => `${f.name}|${f.size}|${f.lastModified}`));
+  files.forEach(file => {
+    const key = `${file.name}|${file.size}|${file.lastModified}`;
+    if(!existing.has(key)) {
+      pendingBatchFiles.push(file);
+      existing.add(key);
+    }
+  });
+
+  renderBatchFileList();
+  if(e?.target) e.target.value = '';
+}
+
+function openBatchAdd() {
+  if(batchDeleteMode) cancelBatchDelete();
+  closeDetail();
+  pendingBatchFiles = [];
+  const author = document.getElementById('batch-author');
+  const genre = document.getElementById('batch-genre');
+  const shelf = document.getElementById('batch-shelf');
+  const status = document.getElementById('batch-status');
+  if(author) author.value = '';
+  if(genre) genre.value = '';
+  if(shelf) shelf.value = '';
+  if(status) status.value = 'unread';
+  renderBatchFileList();
+  document.getElementById('batch-add-bg').style.display = 'flex';
+  setTimeout(() => document.getElementById('batch-pdf-input').focus(), 80);
+}
+
+function closeBatchAdd() {
+  document.getElementById('batch-add-bg').style.display = 'none';
+}
+
+async function saveBatchAdd() {
+  if(!pendingBatchFiles.length) {
+    toast('Select one or more PDF files first.');
+    return;
+  }
+
+  if(!supabaseClient || !currentUser) {
+    toast('Sign in to cloud first to batch add PDFs.');
+    return;
+  }
+
+  const author = (document.getElementById('batch-author')?.value || '').trim();
+  const genre = (document.getElementById('batch-genre')?.value || '').trim();
+  const shelf = (document.getElementById('batch-shelf')?.value || '').trim();
+  const status = normalizeBatchStatus(document.getElementById('batch-status')?.value || 'unread');
+  const saveBtn = document.getElementById('btn-save-batch');
+  const prevLabel = saveBtn ? saveBtn.textContent : '';
+  if(saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Adding...';
+  }
+
+  const created = [];
+  let failed = 0;
+  let lastError = null;
+
+  for(const file of pendingBatchFiles) {
+    try {
+      const id = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      const uploaded = await uploadPdfFileToCloud(file, id);
+
+      let pdfCover = null;
+      try {
+        const ab = await readFileAsArrayBuffer(file);
+        pdfCover = await generatePdfCover(new Uint8Array(ab));
+      } catch(_coverErr) {
+        pdfCover = null;
+      }
+
+      created.push({
+        id,
+        title: normalizeBatchTitle(file.name),
+        author,
+        cover: '',
+        genre,
+        shelf,
+        status,
+        notes: '',
+        pal: BATCH_DEFAULT_PALETTE,
+        pdfPath: uploaded.pdfPath,
+        pdfUrl: uploaded.pdfUrl,
+        legacyPdfData: null,
+        pdfName: uploaded.pdfName,
+        pdfSize: uploaded.pdfSize,
+        usePdfCover: !!pdfCover,
+        pdfCover: pdfCover || null,
+        createdAt: new Date().toISOString(),
+      });
+    } catch(err) {
+      failed += 1;
+      lastError = err;
+    }
+  }
+
+  if(saveBtn) {
+    saveBtn.disabled = false;
+    saveBtn.textContent = prevLabel || 'Add books';
+  }
+
+  if(!created.length) {
+    const msg = lastError ? friendlyCloudError(lastError) : 'Could not process those PDF files.';
+    toast(msg);
+    return;
+  }
+
+  books = [...created, ...books];
+  pendingBatchFiles = [];
+  closeBatchAdd();
+  persistLibrary();
+
+  if(failed) {
+    toast(`Added ${created.length} book${created.length===1 ? '' : 's'}. ${failed} file${failed===1 ? '' : 's'} failed.`);
+  } else {
+    toast(`Added ${created.length} book${created.length===1 ? '' : 's'} from PDFs.`);
+  }
+}
+function updateBatchDeleteUi() {
+  const toggle = document.getElementById('btn-batch-delete-toggle');
+  const confirmBtn = document.getElementById('btn-batch-delete-confirm');
+  const cancelBtn = document.getElementById('btn-batch-delete-cancel');
+  const addBtn = document.getElementById('btn-add-book');
+  const addBatchBtn = document.getElementById('btn-batch-add');
+  if(toggle) toggle.style.display = batchDeleteMode ? 'none' : 'inline-block';
+  if(confirmBtn) {
+    confirmBtn.style.display = batchDeleteMode ? 'inline-block' : 'none';
+    confirmBtn.textContent = `Delete selected (${selectedBookIds.size})`;
+    confirmBtn.disabled = selectedBookIds.size === 0;
+  }
+  if(cancelBtn) cancelBtn.style.display = batchDeleteMode ? 'inline-block' : 'none';
+  if(addBtn) addBtn.style.display = batchDeleteMode ? 'none' : 'inline-block';
+  if(addBatchBtn) addBatchBtn.style.display = batchDeleteMode ? 'none' : 'inline-block';
+}
+
+function cleanBatchSelection(options = {}) {
+  selectedBookIds.clear();
+  if(!options.keepMode) batchDeleteMode = false;
+  updateBatchDeleteUi();
+}
+
+function toggleBatchDeleteMode() {
+  batchDeleteMode = !batchDeleteMode;
+  if(batchDeleteMode) {
+    selectedBookIds.clear();
+    closeDetail();
+    closeBatchAdd();
+    toast('Batch delete mode on. Select books, then delete.');
+  } else {
+    selectedBookIds.clear();
+  }
+  updateBatchDeleteUi();
+  render();
+}
+
+function cancelBatchDelete() {
+  cleanBatchSelection({ keepMode: false });
+  render();
+}
+
+function toggleBookSelection(id) {
+  const key = String(id);
+  if(!batchDeleteMode) return;
+  if(selectedBookIds.has(key)) selectedBookIds.delete(key);
+  else selectedBookIds.add(key);
+  updateBatchDeleteUi();
+  render();
+}
+
+function deleteSelectedBooks() {
+  if(!batchDeleteMode) return;
+  const count = selectedBookIds.size;
+  if(!count) {
+    toast('Select at least one book.');
+    return;
+  }
+  const sure = confirm(`Delete ${count} selected book${count===1 ? '' : 's'}? This cannot be undone.`);
+  if(!sure) return;
+  const snap = snapshotBooks();
+  books = books.filter(b => !selectedBookIds.has(String(b.id)));
+  cleanBatchSelection({ keepMode: false });
+  persistLibrary();
+  showUndoDelete(snap, `Deleted ${count} book${count===1 ? '' : 's'}.`);
+  toast(`Deleted ${count} book${count===1 ? '' : 's'}.`);
+}
+
+function renderBookCards(list, sectionKey = '') {
+  return list.map((b, i) => {
+    const totalPages = Number(b.pdfTotalPages || 0);
+    const readPage = Number(b.lastReadPage || 0);
+    const progressPct = totalPages > 0 ? Math.max(0, Math.min(100, Math.round((readPage / totalPages) * 100))) : 0;
+    const tag = [b.shelf, b.genre].filter(Boolean).join(' · ');
+    const progressHtml = hasPdfAsset(b) && totalPages > 0 && (b.status || 'unread') !== 'read'
+      ? `<div class="progress-wrap"><div class="progress-label">${progressPct}% read · ${readPage}/${totalPages}</div><div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div></div>`
+      : '';
+
+    return `
+    <div class="book-card${batchDeleteMode && selectedBookIds.has(String(b.id)) ? ' batch-selected' : ''}" onclick='${batchDeleteMode ? `toggleBookSelection(${JSON.stringify(String(b.id))})` : `openDetail(${JSON.stringify(String(b.id))})` }' style="animation-delay:${Math.min(i*0.04,0.4)}s">
+      <div class="cover-wrap">
+        ${coverHTML(b,false)}
+        ${batchDeleteMode ? `<button class="batch-check ${selectedBookIds.has(String(b.id)) ? 'on' : ''}" type="button" onclick='event.stopPropagation();toggleBookSelection(${JSON.stringify(String(b.id))})'>${selectedBookIds.has(String(b.id)) ? '✓' : '○'}</button>` : ''}
+        <div class="status-dot ${dotClass(b.status)}"></div>
+        ${hasPdfAsset(b) ? '<div class="has-pdf-badge">PDF</div>' : ''}
+      </div>
+      <div class="card-body" style="background:${(PALETTES[b.pal||0] || PALETTES[0]).bg}">
+        <div class="card-title">${b.title||'Untitled'}</div>
+        <div class="card-author">${b.author||''}</div>
+        ${progressHtml}
+        <div class="card-footer">
+          <span class="status-pill ${pillClass(b.status)}">${statusLabel(b.status)}</span>
+          <span class="genre-label">${tag}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  const allIds = new Set(books.map(b => String(b.id)));
+  for(const id of [...selectedBookIds]) {
+    if(!allIds.has(id)) selectedBookIds.delete(id);
+  }
+  updateBatchDeleteUi();
+
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const fs = document.getElementById('filter-status').value;
+  const sortBy = document.getElementById('sort-books')?.value || 'added-desc';
+
+  document.getElementById('s-total').textContent = books.length;
+  document.getElementById('s-read').textContent = books.filter(b => b.status==='read').length;
+  document.getElementById('s-reading').textContent = books.filter(b => b.status==='reading').length;
+  document.getElementById('s-unread').textContent = books.filter(b => !b.status || b.status==='unread').length;
+  document.getElementById('s-pdfs').textContent = books.filter(b => hasPdfAsset(b)).length;
+
+  const filtered = books.filter(b => {
+    const hay = [b.title, b.author, b.genre, b.shelf, b.notes, b.pdfName].map(x => (x || '').toLowerCase()).join(' ');
+    if(q && !hay.includes(q)) return false;
+    if(fs && b.status !== fs) return false;
+    return true;
+  });
+
+  const list = sortBooksList(filtered, sortBy);
+  const readingList = [...list.filter(b => b.status === 'reading')]
+    .sort((a, b) => bookOpenedTime(b) - bookOpenedTime(a));
+
+  const readingSection = document.getElementById('reading-section');
+  const readingGrid = document.getElementById('reading-grid');
+  if(readingSection && readingGrid) {
+    if(readingList.length) {
+      readingSection.style.display = 'block';
+      readingGrid.innerHTML = renderBookCards(readingList, 'reading');
+    } else {
+      readingSection.style.display = 'none';
+      readingGrid.innerHTML = '';
+    }
+  }
+
+  const allSection = document.getElementById('all-books-section');
+  const grid = document.getElementById('grid');
+  if(!list.length) {
+    if(allSection) allSection.style.display = 'block';
+    grid.innerHTML = `<div class="empty"><span class="empty-icon">🌸</span><p>${books.length===0 ? 'Your library is empty. Add your first beloved book.' : 'No books match your search.'}</p></div>`;
+    return;
+  }
+
+  if(allSection) allSection.style.display = 'block';
+  grid.innerHTML = renderBookCards(list, 'all');
+}
+
+async function generatePdfCover(source) {
+  try {
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const loadingTask = (source instanceof Uint8Array)
+      ? pdfjsLib.getDocument({ data: source })
+      : pdfjsLib.getDocument(source);
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    return canvas.toDataURL('image/jpeg', 0.88);
+  } catch(e) {
+    return null;
+  }
+}
+
+async function handlePdfUpload(e) {
+  const file = e?.target?.files?.[0];
+  if(!file) return;
+  if(file.size > 50*1024*1024) {
+    toast('This PDF is too large (max 50 MB).');
+    return;
+  }
+
+  pendingPdfFile = file;
+  pendingPdfRemoved = false;
+  pendingPdfName = file.name;
+  pendingPdfSize = file.size;
+  pendingPdfCover = null;
+
+  const uploadStatus = document.getElementById('upload-inline-status');
+  if(uploadStatus) uploadStatus.textContent = 'Preparing cover preview...';
+
+  document.getElementById('upload-zone').style.display = 'none';
+  document.getElementById('pdf-attached').style.display = 'flex';
+  document.getElementById('pdf-name').textContent = file.name;
+  document.getElementById('pdf-size').textContent = fmtSize(file.size);
+  if(!document.getElementById('f-title').value) {
+    document.getElementById('f-title').value = file.name.replace(/\.pdf$/i,'');
+  }
+  document.getElementById('f-pdf-cover').checked = true;
+  try {
+    const ab = await readFileAsArrayBuffer(file);
+    const cover = await generatePdfCover(new Uint8Array(ab));
+    if(cover) {
+      pendingPdfCover = cover;
+      toast('Cover generated from PDF.');
+    }
+  } catch(err) {
+  } finally {
+    if(uploadStatus) uploadStatus.textContent = '';
+  }
+}
+
+function removePdf(e) {
+  if(e) e.stopPropagation();
+  pendingPdfRemoved = true;
+  pendingPdfFile = null;
+  pendingPdfName = null;
+  pendingPdfSize = null;
+  pendingPdfCover = null;
+  const uploadStatus = document.getElementById('upload-inline-status');
+  if(uploadStatus) uploadStatus.textContent = '';
+  document.getElementById('upload-zone').style.display = 'block';
+  document.getElementById('pdf-attached').style.display = 'none';
+  document.getElementById('pdf-input').value = '';
+  document.getElementById('f-pdf-cover').checked = false;
+}
+
+
+function openAdd() {
+  if(batchDeleteMode) cancelBatchDelete();
+  editId = null;
+  selPal = 0;
+  setBookSaveLoading(false);
+  pendingPdfFile = null;
+  pendingPdfName = null;
+  pendingPdfSize = null;
+  pendingPdfCover = null;
+  document.getElementById('modal-title').textContent = 'Add a new book';
+  ['f-title','f-author','f-cover','f-genre','f-shelf','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-status').value = 'unread';
+  document.getElementById('f-pdf-cover').checked = false;
+  document.getElementById('btn-delete').style.display = 'none';
+  document.getElementById('upload-zone').style.display = 'block';
+  document.getElementById('pdf-attached').style.display = 'none';
+  document.getElementById('pdf-input').value = '';
+  buildPalette();
+  document.getElementById('modal-bg').style.display = 'flex';
+  setTimeout(() => document.getElementById('f-title').focus(), 100);
+}
+
+function openEdit(id) {
+  closeDetail();
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b) return;
+  editId = String(id);
+  selPal = b.pal || 0;
+  setBookSaveLoading(false);
+  pendingPdfFile = null;
+  pendingPdfName = b.pdfName || null;
+  pendingPdfSize = b.pdfSize || null;
+  pendingPdfCover = b.pdfCover || null;
+  pendingPdfRemoved = false;
+  document.getElementById('modal-title').textContent = 'Edit book';
+  document.getElementById('f-title').value = b.title || '';
+  document.getElementById('f-author').value = b.author || '';
+  document.getElementById('f-cover').value = b.cover || '';
+  document.getElementById('f-genre').value = b.genre || '';
+  document.getElementById('f-shelf').value = b.shelf || '';
+  document.getElementById('f-status').value = b.status || 'unread';
+  document.getElementById('f-notes').value = b.notes || '';
+  document.getElementById('f-pdf-cover').checked = !!b.usePdfCover;
+  document.getElementById('btn-delete').style.display = 'inline-block';
+  if(hasPdfAsset(b)) {
+    document.getElementById('upload-zone').style.display = 'none';
+    document.getElementById('pdf-attached').style.display = 'flex';
+    document.getElementById('pdf-name').textContent = pendingPdfName || 'Attached PDF';
+    document.getElementById('pdf-size').textContent = pendingPdfSize ? fmtSize(pendingPdfSize) : '';
+  } else {
+    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('pdf-attached').style.display = 'none';
+    document.getElementById('pdf-input').value = '';
+  }
+  buildPalette();
+  document.getElementById('modal-bg').style.display = 'flex';
+}
+
+function persistLibrary(options = {}) {
+  claimLibraryForCurrentUser();
+  markLibraryChanged();
+  saveLocalCache();
+  if(options.render !== false) render();
+  if(options.sync !== false) {
+    cloudDirty = true;
+    scheduleAutoSync();
+  }
+}
+
+function persistLibraryQuiet() {
+  claimLibraryForCurrentUser();
+  markLibraryChanged();
+  saveLocalCache();
+  cloudDirty = true;
+  scheduleAutoSync();
+}
+
+function markBookOpened(id) {
+  const i = books.findIndex(x => String(x.id) === String(id));
+  if(i < 0) return;
+  books[i].lastOpenedAt = new Date().toISOString();
+  persistLibraryQuiet();
+}
+
+function resetBookProgress(book) {
+  if(!book) return;
+  book.lastReadPage = 0;
+  book.pdfTotalPages = 0;
+  book.lastReadAt = null;
+}
+
+function updateBookReadingProgress(id, page, totalPages) {
+  const i = books.findIndex(x => String(x.id) === String(id));
+  if(i < 0) return;
+  const nextPage = Math.max(0, Math.floor(Number(page) || 0));
+  const nextTotal = Math.max(0, Math.floor(Number(totalPages) || 0));
+  const current = books[i];
+  const sameProgress = (Number(current.lastReadPage) || 0) === nextPage && (Number(current.pdfTotalPages) || 0) === nextTotal;
+  const reachedEnd = nextTotal > 0 && nextPage >= nextTotal;
+  const shouldMarkFinished = reachedEnd && current.status !== 'read';
+  const shouldMarkReading = !reachedEnd && nextPage > 0 && (current.status || 'unread') === 'unread';
+  if(sameProgress && !shouldMarkFinished && !shouldMarkReading) return;
+  const now = new Date().toISOString();
+  current.lastOpenedAt = now;
+  current.lastReadAt = now;
+  current.lastReadPage = nextPage;
+  current.pdfTotalPages = nextTotal;
+  if(shouldMarkFinished) current.status = 'read';
+  else if(shouldMarkReading) current.status = 'reading';
+  persistLibraryQuiet();
+}
+
+async function saveBook() {
+  const title = document.getElementById('f-title').value.trim();
+  if(!title) {
+    document.getElementById('f-title').focus();
+    return;
+  }
+  if(uploadInFlight) return;
+
+  const usePdfCover = document.getElementById('f-pdf-cover').checked;
+  const targetId = editId !== null
+    ? String(editId)
+    : `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+  const existing = editId !== null
+    ? books.find(x => String(x.id) === targetId)
+    : null;
+
+  setBookSaveLoading(true, pendingPdfFile ? 'Uploading PDF...' : 'Saving book...');
+
+  try {
+    let pdfMeta = {
+      pdfPath: existing?.pdfPath || null,
+      pdfUrl: existing?.pdfUrl || null,
+      legacyPdfData: existing?.legacyPdfData || null,
+      pdfName: existing?.pdfName || null,
+      pdfSize: existing?.pdfSize || null,
+    };
+
+    if(pendingPdfRemoved) {
+      pdfMeta = {
+        pdfPath: null,
+        pdfUrl: null,
+        legacyPdfData: null,
+        pdfName: null,
+        pdfSize: null,
+      };
+    }
+
+    if(pendingPdfFile) {
+      if(!supabaseClient || !currentUser) {
+        toast('Sign in to cloud first to attach PDFs.');
+        return;
+      }
+      try {
+        const uploaded = await uploadPdfFileToCloud(pendingPdfFile, targetId);
+        pdfMeta = {
+          pdfPath: uploaded.pdfPath,
+          pdfUrl: uploaded.pdfUrl,
+          legacyPdfData: null,
+          pdfName: uploaded.pdfName,
+          pdfSize: uploaded.pdfSize,
+        };
+      } catch(err) {
+        toast(friendlyCloudError(err));
+        return;
+      }
+    }
+
+    const book = {
+      id: targetId,
+      title,
+      author: document.getElementById('f-author').value.trim(),
+      cover: document.getElementById('f-cover').value.trim(),
+      genre: document.getElementById('f-genre').value.trim(),
+      shelf: document.getElementById('f-shelf').value.trim(),
+      status: document.getElementById('f-status').value,
+      notes: document.getElementById('f-notes').value.trim(),
+      pal: selPal,
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      ...pdfMeta,
+      usePdfCover: !!usePdfCover,
+      pdfCover: usePdfCover
+        ? (pendingPdfCover || existing?.pdfCover || null)
+        : null,
+    };
+
+    if(editId !== null) {
+      const i = books.findIndex(x => String(x.id) === targetId);
+      if(i > -1) {
+        books[i] = { ...books[i], ...book };
+        if(book.status === 'unread') resetBookProgress(books[i]);
+      }
+    } else {
+      books.unshift(book);
+    }
+
+    closeModal();
+    persistLibrary();
+    toast(editId !== null ? 'Book updated.' : 'Added to your library.');
+  } finally {
+    setBookSaveLoading(false);
+  }
+}
+
+function deleteBook() {
+  const target = books.find(x => String(x.id) === String(editId));
+  if(!target) return;
+  const label = target.title ? ` "${target.title}"` : ' this book';
+  if(!confirm(`Delete${label}? This cannot be undone.`)) return;
+  const snap = snapshotBooks();
+  books = books.filter(x => String(x.id) !== String(editId));
+  closeModal();
+  persistLibrary();
+  showUndoDelete(snap, `Deleted${label}.`);
+  toast('Book removed from your library.');
+}
+
+function closeModal() {
+  setBookSaveLoading(false);
+  document.getElementById('modal-bg').style.display = 'none';
+}
+
+function setBookStatusFromDetail(id, status) {
+  const next = ['unread', 'reading', 'read'].includes(status) ? status : 'unread';
+  const i = books.findIndex(x => String(x.id) === String(id));
+  if(i < 0) return;
+  if((books[i].status || 'unread') === next) return;
+  books[i].status = next;
+  if(next === 'unread') resetBookProgress(books[i]);
+  persistLibrary();
+  openDetail(id);
+  toast(`Status set to ${statusLabel(next)}.`);
+}
+
+function deleteBookFromDetail(id) {
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b) return;
+  const label = b.title ? ` "${b.title}"` : ' this book';
+  if(!confirm(`Delete${label}? This cannot be undone.`)) return;
+  const snap = snapshotBooks();
+  books = books.filter(x => String(x.id) !== String(id));
+  closeDetail();
+  persistLibrary();
+  showUndoDelete(snap, `Deleted${label}.`);
+  toast('Book removed from your library.');
+}
+
+function openDetail(id) {
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b) return;
+  document.getElementById('d-cover').innerHTML = coverHTML(b, true);
+  document.getElementById('d-title').textContent = b.title || 'Untitled';
+  document.getElementById('d-author').textContent = b.author ? 'by ' + b.author : '';
+  document.getElementById('d-pills').innerHTML = `
+    <span class="status-pill ${pillClass(b.status)}">${statusLabel(b.status)}</span>
+    ${b.shelf ? `<span class="genre-label" style="font-size:12px;color:var(--ink3)">• ${b.shelf}</span>` : ''}
+    ${b.genre ? `<span class="genre-label" style="font-size:12px;color:var(--ink3)">• ${b.genre}</span>` : ''}
+    `;
+  document.getElementById('d-status-row').innerHTML = `
+    <span class="detail-status-label">Change status</span>
+    <div class="detail-status-buttons">
+      <button class="detail-status-btn ${!b.status || b.status==='unread' ? 'active' : ''}" onclick='setBookStatusFromDetail(${JSON.stringify(String(b.id))}, "unread")'>Unread</button>
+      <button class="detail-status-btn ${b.status==='reading' ? 'active' : ''}" onclick='setBookStatusFromDetail(${JSON.stringify(String(b.id))}, "reading")'>Reading</button>
+      <button class="detail-status-btn ${b.status==='read' ? 'active' : ''}" onclick='setBookStatusFromDetail(${JSON.stringify(String(b.id))}, "read")'>Finished</button>
+    </div>
+  `;
+
+  const pdfRow = document.getElementById('d-pdf-row');
+  if(hasPdfAsset(b)) {
+    const continueLabel = Number(b.lastReadPage || 0) > 1 ? `Continue page ${b.lastReadPage}` : 'Read PDF';
+    pdfRow.innerHTML = `
+      <button class="btn btn-primary" onclick='openReader(${JSON.stringify(String(b.id))})' style="margin-top:8px">${continueLabel}</button>
+      <button class="btn btn-sage" onclick='downloadPdf(${JSON.stringify(String(b.id))})' style="margin-top:8px">Download PDF</button>
+    `;
+  } else {
+    pdfRow.innerHTML = '';
+  }
+
+  document.getElementById('d-notes').textContent = b.notes || 'No notes yet.';
+  document.getElementById('d-edit-btn').onclick = () => openEdit(id);
+  document.getElementById('detail-bg').style.display = 'flex';
+  markBookOpened(id);
+}
+
+function closeDetail() {
+  document.getElementById('detail-bg').style.display = 'none';
+}
+
+let readerDoc = null;
+let readerRenderTask = null;
+let readerPage = 1;
+let readerTotalPages = 0;
+let readerZoom = 1.2;
+let readerBookId = null;
+let readerWheelHandler = null;
+let readerWheelDeltaCarry = 0;
+let readerWheelPaging = false;
+let readerChromeTimer = null;
+let readerTouchStartX = 0;
+let readerTouchStartY = 0;
+let readerTouchStartTs = 0;
+let readerLastTapTs = 0;
+let readerTouchMoved = false;
+let readerTouchHintTimer = null;
+let readerLastScrollTop = 0;
+let lastInteractionTime = Date.now();
+
+function readerIsOpen() {
+  return document.getElementById('reader-overlay')?.style.display === 'flex';
+}
+
+function getReaderFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+}
+
+function readerIsFullscreen() {
+  const overlay = document.getElementById('reader-overlay');
+  const fsEl = getReaderFullscreenElement();
+  return !!overlay && !!fsEl && fsEl === overlay;
+}
+
+async function requestReaderFullscreen() {
+  const overlay = document.getElementById('reader-overlay');
+  if(!overlay) return false;
+  if(overlay.requestFullscreen) { await overlay.requestFullscreen(); return true; }
+  if(overlay.webkitRequestFullscreen) { overlay.webkitRequestFullscreen(); return true; }
+  if(overlay.msRequestFullscreen) { overlay.msRequestFullscreen(); return true; }
+  return false;
+}
+
+async function exitReaderFullscreen() {
+  if(document.exitFullscreen) { await document.exitFullscreen(); return true; }
+  if(document.webkitExitFullscreen) { document.webkitExitFullscreen(); return true; }
+  if(document.msExitFullscreen) { document.msExitFullscreen(); return true; }
+  return false;
+}
+
+function updateReaderFullscreenUi() {
+  const isFs = readerIsFullscreen();
+  const label = isFs ? '⤢ Exit full screen' : '⤢ Full screen';
+  const fsBtn = document.getElementById('reader-fs-btn');
+  if(fsBtn) fsBtn.textContent = label;
+}
+
+async function toggleReaderFullscreen() {
+  if(!readerIsOpen()) return;
+  markInteraction();
+  const entering = !readerIsFullscreen();
+  try {
+    if(!entering) {
+      await exitReaderFullscreen();
+    } else {
+      const ok = await requestReaderFullscreen();
+      if(!ok) {
+        toast('Full screen is not supported on this device.');
+        return;
+      }
+      if(readerDoc) {
+        await new Promise(resolve => setTimeout(resolve, 90));
+        await setReaderZoomToFit(readerPage);
+        await renderReaderPage();
+      }
+    }
+  } catch(e) {
+    toast('Could not switch full screen mode.');
+  } finally {
+    updateReaderFullscreenUi();
+    showReaderChromeTemporarily('fullscreen');
+  }
+}
+
+async function handleReaderFullscreenChange() {
+  updateReaderFullscreenUi();
+  if(!readerIsOpen()) return;
+  if(readerIsFullscreen() && readerDoc) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 80));
+      await setReaderZoomToFit(readerPage);
+      await renderReaderPage();
+    } catch(e) {}
+  }
+  showReaderChromeTemporarily('fullscreen');
+}
+function isMobileReaderMode() {
+  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 760;
+}
+
+function markInteraction() {
+  lastInteractionTime = Date.now();
+}
+
+function createTapFeedback(clientX, clientY) {
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'tap-feedback';
+  ripple.style.left = `${clientX - rect.left + wrap.scrollLeft - 10}px`;
+  ripple.style.top = `${clientY - rect.top + wrap.scrollTop - 10}px`;
+  wrap.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+}
+function scheduleReaderChromeHide(reason = 'interaction') {
+  const overlay = document.getElementById('reader-overlay');
+  if(!overlay || !readerIsOpen()) return;
+  if(readerChromeTimer) clearTimeout(readerChromeTimer);
+  const delay = reason === 'centerTap' ? READER_CHROME_HIDE_MS + 260 : READER_CHROME_HIDE_MS + 140;
+  readerChromeTimer = setTimeout(() => {
+    if(!readerIsOpen()) return;
+    const elapsed = Date.now() - lastInteractionTime;
+    if(elapsed < READER_HIDE_GRACE_MS) {
+      scheduleReaderChromeHide(reason);
+      return;
+    }
+    overlay.classList.add('chrome-hidden');
+  }, delay);
+}
+
+function showReaderChromeTemporarily(reason = 'interaction') {
+  if(reason !== 'touch-nav') markInteraction();
+  const overlay = document.getElementById('reader-overlay');
+  if(!overlay || !readerIsOpen()) return;
+  const mobile = isMobileReaderMode();
+  if(mobile && reason === 'touch-nav') return;
+  const desktopAllowed = reason === 'hover' || reason === 'control' || reason === 'open' || reason === 'fullscreen' || reason === 'fit' || reason === 'centerTap' || reason === 'scroll-up';
+  if(!mobile && !desktopAllowed) return;
+  overlay.classList.remove('chrome-hidden');
+  scheduleReaderChromeHide(reason);
+}
+
+function toggleReaderChrome() {
+  markInteraction();
+  const overlay = document.getElementById('reader-overlay');
+  if(!overlay || !readerIsOpen()) return;
+  if(overlay.classList.contains('chrome-hidden')) {
+    overlay.classList.remove('chrome-hidden');
+    scheduleReaderChromeHide('centerTap');
+  } else {
+    overlay.classList.add('chrome-hidden');
+    if(readerChromeTimer) {
+      clearTimeout(readerChromeTimer);
+      readerChromeTimer = null;
+    }
+  }
+}
+
+function hideReaderTouchHint() {
+  const hint = document.getElementById('reader-touch-hint');
+  if(hint) hint.classList.remove('show');
+  if(readerTouchHintTimer) {
+    clearTimeout(readerTouchHintTimer);
+    readerTouchHintTimer = null;
+  }
+}
+
+function showReaderTouchHintOnce() {
+  if(!isMobileReaderMode() || !readerIsOpen()) return;
+  let seen = false;
+  try {
+    seen = localStorage.getItem(READER_TOUCH_HINT_KEY) === '1';
+  } catch(e) {}
+  if(seen) return;
+  const hint = document.getElementById('reader-touch-hint');
+  if(!hint) return;
+  hint.classList.add('show');
+  if(readerTouchHintTimer) clearTimeout(readerTouchHintTimer);
+  readerTouchHintTimer = setTimeout(() => {
+    hint.classList.remove('show');
+  }, 2600);
+  try {
+    localStorage.setItem(READER_TOUCH_HINT_KEY, '1');
+  } catch(e) {}
+}
+
+function resetReaderChrome() {
+  const overlay = document.getElementById('reader-overlay');
+  if(overlay) overlay.classList.remove('chrome-hidden');
+  if(readerChromeTimer) {
+    clearTimeout(readerChromeTimer);
+    readerChromeTimer = null;
+  }
+  hideReaderTouchHint();
+}
+
+function handleReaderScrollVisibility() {
+  const overlay = document.getElementById('reader-overlay');
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!overlay || !wrap || !readerIsOpen()) return;
+
+  const currentTop = Math.max(0, wrap.scrollTop || 0);
+  const delta = currentTop - readerLastScrollTop;
+  if(Math.abs(delta) < 5) return;
+
+  if(delta > 0) {
+    overlay.classList.add('chrome-hidden');
+    if(readerChromeTimer) {
+      clearTimeout(readerChromeTimer);
+      readerChromeTimer = null;
+    }
+  } else {
+    showReaderChromeTemporarily('scroll-up');
+  }
+
+  readerLastScrollTop = currentTop;
+}
+function readerHandleTouchStart(event) {
+  if(!isMobileReaderMode()) return;
+  markInteraction();
+  const touch = event?.changedTouches?.[0];
+  if(!touch) return;
+  readerTouchStartX = touch.clientX;
+  readerTouchStartY = touch.clientY;
+  readerTouchStartTs = Date.now();
+  readerTouchMoved = false;
+}
+
+function readerHandleTouchMove(event) {
+  return;
+}
+
+async function readerHandleTouchEnd(event) {
+  if(!isMobileReaderMode()) return;
+  const touch = event?.changedTouches?.[0];
+  if(!touch) return;
+
+  const dx = touch.clientX - readerTouchStartX;
+  const dy = touch.clientY - readerTouchStartY;
+  const dt = Date.now() - readerTouchStartTs;
+  if(Math.abs(dx) > 10 || Math.abs(dy) > 10 || dt > 420) {
+    readerTouchMoved = true;
+  }
+  if(readerTouchMoved) return;
+
+  createTapFeedback(touch.clientX, touch.clientY);
+  markInteraction();
+
+  const width = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+  const x = touch.clientX;
+  const leftEdge = width * 0.25;
+  const rightEdge = width * 0.75;
+
+  if(x <= leftEdge) {
+    await goReaderPrev('touch-nav');
+    return;
+  }
+  if(x >= rightEdge) {
+    await goReaderNext('touch-nav');
+    return;
+  }
+
+  toggleReaderChrome();
+}
+
+function readerKeyTargetIgnored(target) {
+  if(!target) return false;
+  if(target.isContentEditable) return true;
+  const tag = (target.tagName || '').toUpperCase();
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+function resetReaderScrollPosition() {
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!wrap) return;
+  wrap.scrollTop = 0;
+  wrap.scrollLeft = 0;
+}
+async function goReaderPrev(reason = 'interaction') {
+  if(!readerDoc || readerPage <= 1) return;
+  showReaderChromeTemporarily(reason);
+  readerPage -= 1;
+  await renderReaderPage();
+  resetReaderScrollPosition();
+}
+
+async function goReaderNext(reason = 'interaction') {
+  if(!readerDoc || readerPage >= readerTotalPages) return;
+  showReaderChromeTemporarily(reason);
+  readerPage += 1;
+  await renderReaderPage();
+  resetReaderScrollPosition();
+}
+
+function scrollReaderByPages(direction, distanceFactor = 1) {
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!wrap) return;
+  const step = Math.max(90, Math.round(wrap.clientHeight * 0.56 * distanceFactor));
+  wrap.scrollBy({ top: direction * step, left: 0, behavior: 'smooth' });
+}
+
+function readerScrollUp() {
+  markInteraction();
+  showReaderChromeTemporarily('control');
+  scrollReaderByPages(-1);
+}
+
+function readerScrollDown() {
+  markInteraction();
+  showReaderChromeTemporarily('control');
+  scrollReaderByPages(1);
+}
+
+function readerKeyScrollUp() {
+  scrollReaderByPages(-1, READER_KEY_SCROLL_FACTOR);
+}
+
+function readerKeyScrollDown() {
+  scrollReaderByPages(1, READER_KEY_SCROLL_FACTOR);
+}
+
+async function onReaderWheel(e) {
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!wrap || !readerDoc || readerWheelPaging) return;
+  markInteraction();
+  if(isMobileReaderMode()) showReaderChromeTemporarily('interaction');
+  if(Math.abs(e.deltaY) < 5) return;
+
+  const atTop = wrap.scrollTop <= 2;
+  const atBottom = (wrap.scrollTop + wrap.clientHeight) >= (wrap.scrollHeight - 2);
+
+  if(e.deltaY > 0 && atBottom && readerPage < readerTotalPages) {
+    e.preventDefault();
+    readerWheelDeltaCarry = readerWheelDeltaCarry > 0 ? (readerWheelDeltaCarry + e.deltaY) : e.deltaY;
+    const steps = Math.floor(readerWheelDeltaCarry / READER_WHEEL_PAGE_DELTA);
+    if(steps <= 0) return;
+    readerWheelDeltaCarry -= steps * READER_WHEEL_PAGE_DELTA;
+    const targetPage = Math.min(readerTotalPages, readerPage + steps);
+    if(targetPage === readerPage) return;
+    readerWheelPaging = true;
+    readerPage = targetPage;
+    await renderReaderPage();
+    readerWheelPaging = false;
+    wrap.scrollTop = 0;
+    return;
+  }
+
+  if(e.deltaY < 0 && atTop && readerPage > 1) {
+    e.preventDefault();
+    readerWheelDeltaCarry = readerWheelDeltaCarry < 0 ? (readerWheelDeltaCarry + e.deltaY) : e.deltaY;
+    const steps = Math.floor(Math.abs(readerWheelDeltaCarry) / READER_WHEEL_PAGE_DELTA);
+    if(steps <= 0) return;
+    readerWheelDeltaCarry += steps * READER_WHEEL_PAGE_DELTA;
+    const targetPage = Math.max(1, readerPage - steps);
+    if(targetPage === readerPage) return;
+    readerWheelPaging = true;
+    readerPage = targetPage;
+    await renderReaderPage();
+    readerWheelPaging = false;
+    wrap.scrollTop = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
+    return;
+  }
+
+  readerWheelDeltaCarry = 0;
+}
+function updateReaderUi() {
+  const pageMeta = document.getElementById('reader-page-meta');
+  const zoomMeta = document.getElementById('reader-zoom-meta');
+  const prevBtn = document.getElementById('reader-prev-btn');
+  const nextBtn = document.getElementById('reader-next-btn');
+  const label = `Page ${readerPage} / ${readerTotalPages || 1}`;
+  if(pageMeta) pageMeta.textContent = label;
+  if(zoomMeta) zoomMeta.textContent = `${Math.round((readerZoom || 1) * 100)}%`;
+  if(prevBtn) prevBtn.disabled = readerPage <= 1;
+  if(nextBtn) nextBtn.disabled = !readerTotalPages || readerPage >= readerTotalPages;
+}
+
+async function renderReaderPage() {
+  if(!readerDoc) return;
+  if(readerRenderTask) {
+    try { readerRenderTask.cancel(); } catch(e) {}
+    readerRenderTask = null;
+  }
+  const page = await readerDoc.getPage(readerPage);
+  const viewport = page.getViewport({ scale: readerZoom });
+  const canvas = document.getElementById('reader-canvas');
+  const ctx = canvas.getContext('2d');
+
+  canvas.style.opacity = '0';
+  canvas.style.transform = 'scale(0.985)';
+
+  const outputScale = Math.min(Math.max(window.devicePixelRatio || 1, 1), READER_MAX_RENDER_DPR);
+  canvas.width = Math.ceil(viewport.width * outputScale);
+  canvas.height = Math.ceil(viewport.height * outputScale);
+  canvas.style.width = `${Math.ceil(viewport.width)}px`;
+  canvas.style.height = `${Math.ceil(viewport.height)}px`;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
+  readerRenderTask = page.render({ canvasContext: ctx, viewport });
+  try {
+    await readerRenderTask.promise;
+    requestAnimationFrame(() => {
+      canvas.style.opacity = '1';
+      canvas.style.transform = 'scale(1)';
+    });
+  } catch(err) {
+    if(err?.name !== 'RenderingCancelledException') throw err;
+  } finally {
+    readerRenderTask = null;
+  }
+  if(readerBookId) updateBookReadingProgress(readerBookId, readerPage, readerTotalPages);
+  updateReaderUi();
+}
+
+async function openPdfInTab(id) {
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b || !hasPdfAsset(b)) return;
+
+  const popup = window.open('', '_blank');
+  try {
+    const blob = await fetchPdfBlobForBook(b);
+    if(!blob) {
+      if(popup) popup.close();
+      toast('Unable to load PDF');
+      return;
+    }
+    const src = URL.createObjectURL(blob);
+    if(popup) popup.location.href = src;
+    else window.open(src, '_blank', 'noopener');
+    setTimeout(() => URL.revokeObjectURL(src), 120000);
+  } catch(err) {
+    if(popup) popup.close();
+    toast('Unable to load PDF');
+  }
+}
+
+async function setReaderZoomToFit(pageNumber = 1) {
+  if(!readerDoc) return;
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(!wrap) return;
+  const page = await readerDoc.getPage(pageNumber);
+  const base = page.getViewport({ scale: 1 });
+  const availableWidth = Math.max(280, wrap.clientWidth - 28);
+  const fitZoom = availableWidth / Math.max(1, base.width);
+  readerZoom = Math.max(0.9, Math.min(2.4, fitZoom));
+}
+
+async function openReader(id) {
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b || !hasPdfAsset(b)) return;
+  closeDetail();
+  closeReader();
+
+  readerBookId = String(id);
+  document.getElementById('reader-title').textContent = b.title || 'Reading';
+  document.getElementById('reader-open-btn').onclick = () => { markInteraction(); openPdfInTab(readerBookId); };
+  document.getElementById('reader-dl-btn').onclick = () => { markInteraction(); downloadPdf(readerBookId); };
+  document.getElementById('reader-prev-btn').onclick = () => goReaderPrev('control');
+  document.getElementById('reader-next-btn').onclick = () => goReaderNext('control');
+  document.getElementById('reader-scroll-up-btn').onclick = readerScrollUp;
+  document.getElementById('reader-scroll-down-btn').onclick = readerScrollDown;
+  document.getElementById('reader-zoom-out-btn').onclick = async () => {
+    markInteraction();
+    readerZoom = Math.max(0.7, readerZoom - 0.15);
+    const canvas = document.getElementById('reader-canvas');
+    if(canvas) canvas.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    await renderReaderPage();
+  };
+  document.getElementById('reader-zoom-in-btn').onclick = async () => {
+    markInteraction();
+    readerZoom = Math.min(3.0, readerZoom + 0.15);
+    const canvas = document.getElementById('reader-canvas');
+    if(canvas) canvas.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+    await renderReaderPage();
+  };
+  document.getElementById('reader-fit-btn').onclick = async () => {
+    markInteraction();
+    await setReaderZoomToFit(readerPage);
+    await renderReaderPage();
+    showReaderChromeTemporarily('fit');
+  };
+  const fsBtn = document.getElementById('reader-fs-btn');
+  if(fsBtn) fsBtn.onclick = () => { markInteraction(); toggleReaderFullscreen(); };
+
+  const overlay = document.getElementById('reader-overlay');
+  overlay.style.display = 'flex';
+  updateReaderFullscreenUi();
+
+  const wrap = document.getElementById('reader-canvas-wrap');
+  wrap.scrollTop = 0;
+  wrap.scrollLeft = 0;
+  readerWheelDeltaCarry = 0;
+  readerWheelPaging = false;
+  readerLastTapTs = 0;
+  markInteraction();
+  if(readerWheelHandler) {
+    wrap.removeEventListener('wheel', readerWheelHandler);
+  }
+  readerWheelHandler = e => { onReaderWheel(e); };
+  wrap.addEventListener('wheel', readerWheelHandler, { passive: false });
+  wrap.ontouchstart = readerHandleTouchStart;
+  wrap.ontouchend = async e => { await readerHandleTouchEnd(e); };
+  wrap.onscroll = () => { handleReaderScrollVisibility(); };
+  readerLastScrollTop = wrap.scrollTop || 0;
+  overlay.onpointermove = e => {
+    if(isMobileReaderMode()) return;
+    if(e && e.clientY <= READER_CHROME_HOVER_REGION_PX) showReaderChromeTemporarily('hover');
+  };
+  overlay.onpointerdown = e => {
+    if(isMobileReaderMode()) return;
+    if(e && e.clientY <= READER_CHROME_HOVER_REGION_PX) showReaderChromeTemporarily('hover');
+  };
+  try {
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    if(!pdfjsLib) throw new Error('PDF engine unavailable');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const source = await resolveReaderPdfSource(b);
+    if(!source) throw new Error('PDF source unavailable');
+
+    const loadingTask = source.type === 'url'
+      ? pdfjsLib.getDocument(source.value)
+      : pdfjsLib.getDocument({ data: source.value });
+
+    readerDoc = await loadingTask.promise;
+    readerTotalPages = readerDoc.numPages || 1;
+    const savedPage = Number(b.lastReadPage || 1);
+    readerPage = Math.min(readerTotalPages, Math.max(1, Math.floor(savedPage) || 1));
+    await setReaderZoomToFit(readerPage);
+    await renderReaderPage();
+    showReaderChromeTemporarily('open');
+    showReaderTouchHintOnce();
+  } catch(err) {
+    console.warn(err);
+    toast('Unable to load PDF');
+    closeReader();
+  }
+}
+
+function closeReader() {
+  const changedBookId = readerBookId;
+  if(readerIsFullscreen()) {
+    exitReaderFullscreen().catch(() => {});
+  }
+  const overlay = document.getElementById('reader-overlay');
+  overlay.style.display = 'none';
+  overlay.onpointermove = null;
+  overlay.onpointerdown = null;
+
+  const wrap = document.getElementById('reader-canvas-wrap');
+  if(wrap && readerWheelHandler) {
+    wrap.removeEventListener('wheel', readerWheelHandler);
+  }
+  if(wrap) {
+    wrap.ontouchstart = null;
+    wrap.ontouchend = null;
+    wrap.onscroll = null;
+  }
+  readerWheelHandler = null;
+  readerWheelDeltaCarry = 0;
+  readerWheelPaging = false;
+  readerLastTapTs = 0;
+  markInteraction();
+  if(readerRenderTask) {
+    try { readerRenderTask.cancel(); } catch(e) {}
+    readerRenderTask = null;
+  }
+  if(readerDoc) {
+    try { readerDoc.destroy(); } catch(e) {}
+    readerDoc = null;
+  }
+  readerPage = 1;
+  readerTotalPages = 0;
+  readerZoom = 1.2;
+  readerBookId = null;
+  const canvas = document.getElementById('reader-canvas');
+  if(canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx && ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+  if(readerBlobUrl) {
+    URL.revokeObjectURL(readerBlobUrl);
+    readerBlobUrl = null;
+  }
+  resetReaderChrome();
+  updateReaderFullscreenUi();
+  if(changedBookId) render();
+}
+
+async function downloadPdf(id) {
+  const b = books.find(x => String(x.id) === String(id));
+  if(!b || !hasPdfAsset(b)) return;
+  try {
+    const blob = await fetchPdfBlobForBook(b);
+    if(!blob) {
+      toast('Unable to load PDF');
+      return;
+    }
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = b.pdfName || (b.title + '.pdf');
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch(err) {
+    toast('Unable to load PDF');
+  }
+}
+
+function exportBackup() {
+  if(!books.length) {
+    toast('Nothing to save yet. Add some books first.');
+    return;
+  }
+  const json = JSON.stringify({
+    version: 5,
+    exportedAt: new Date().toISOString(),
+    updatedAt: libraryUpdatedAt || new Date().toISOString(),
+    books: serializableBooks(),
+  }, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'devikas_library_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup saved.');
+}
+
+function importBackup(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const imported = data.books || data;
+      if(!Array.isArray(imported)) throw new Error('Invalid format');
+      books = normalizeBooks(imported);
+      libraryUpdatedAt = data.updatedAt || new Date().toISOString();
+      if(currentUser?.id) libraryOwnerId = currentUser.id;
+      saveLocalCache();
+      render();
+      cloudDirty = true;
+      scheduleAutoSync();
+      toast(`Restored ${books.length} book${books.length===1 ? '' : 's'}.`);
+    } catch(err) {
+      toast('That backup file is not valid.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function requireCloudReady() {
+  if(!supabaseClient) {
+    toast('Save your Supabase settings first.');
+    return false;
+  }
+  if(!currentUser) {
+    toast('Sign in first to sync across devices.');
+    return false;
+  }
+  return true;
+}
+
+async function cloudPath() {
+  return `${currentUser.id}/${CLOUD_FILE}`;
+}
+
+async function fetchCloudLibrary() {
+  if(!requireCloudReady()) return null;
+  const { data, error } = await supabaseClient.storage.from(currentBucket()).download(await cloudPath());
+  if(error) {
+    if(/not found/i.test(error.message || '')) return null;
+    throw error;
+  }
+  const text = await data.text();
+  const payload = JSON.parse(text);
+  return {
+    books: normalizeBooks(payload.books || []),
+    updatedAt: payload.updatedAt || null,
+  };
+}
+
+async function handlePostLogin() {
+  try {
+    setSyncStatus('Checking cloud copy...', 'warn');
+    const remote = await fetchCloudLibrary();
+    const hasRemote = !!remote?.books?.length;
+    const hasLocal = !!books.length;
+    const signedInUserId = currentUser?.id || null;
+    const localOwnedByAnotherUser = !!(hasLocal && libraryOwnerId && signedInUserId && libraryOwnerId !== signedInUserId);
+
+    if(localOwnedByAnotherUser) {
+      if(hasRemote) {
+        books = normalizeBooks(remote.books);
+        libraryUpdatedAt = remote.updatedAt || new Date().toISOString();
+        libraryOwnerId = signedInUserId;
+        cloudDirty = false;
+        saveLocalCache();
+        render();
+        lastSyncedPayloadSig = currentPayloadSignature();
+        setSyncStatus('Cloud connected', 'ok');
+        toast('Switched account. Loaded that account\'s cloud library.');
+      } else {
+        books = [];
+        libraryUpdatedAt = new Date().toISOString();
+        libraryOwnerId = signedInUserId;
+        cloudDirty = false;
+        saveLocalCache();
+        render();
+        lastSyncedPayloadSig = currentPayloadSignature();
+        setSyncStatus('Cloud empty', 'warn');
+        toast('Switched account. Previous account books stayed private.');
+      }
+      await migrateLegacyPdfBooksInBackground();
+      return;
+    }
+
+    if(hasRemote && hasLocal && booksDiffer(books, remote.books)) {
+      books = normalizeBooks(remote.books);
+      libraryUpdatedAt = remote.updatedAt || new Date().toISOString();
+      libraryOwnerId = signedInUserId;
+      cloudDirty = false;
+      saveLocalCache();
+      render();
+      lastSyncedPayloadSig = currentPayloadSignature();
+      setSyncStatus('Cloud connected', 'ok');
+      toast('Conflict detected. Cloud backup is now the default.');
+      await migrateLegacyPdfBooksInBackground();
+      return;
+    }
+
+    if(hasRemote) {
+      if(!hasLocal || safeTime(remote.updatedAt) >= safeTime(libraryUpdatedAt)) {
+        books = normalizeBooks(remote.books);
+        libraryUpdatedAt = remote.updatedAt || new Date().toISOString();
+        libraryOwnerId = signedInUserId;
+        cloudDirty = false;
+        saveLocalCache();
+        render();
+        lastSyncedPayloadSig = currentPayloadSignature();
+        setSyncStatus('Cloud connected', 'ok');
+        toast('Loaded your cloud library.');
+      } else {
+        if(!libraryOwnerId) libraryOwnerId = signedInUserId;
+        await syncToCloud(true);
+      }
+    } else if(hasLocal) {
+      if(!libraryOwnerId) libraryOwnerId = signedInUserId;
+      await syncToCloud(true);
+    } else {
+      libraryOwnerId = signedInUserId;
+      setSyncStatus('Cloud empty', 'warn');
+    }
+
+    await migrateLegacyPdfBooksInBackground();
+  } catch(err) {
+    setSyncStatus('Cloud error', 'error');
+    toast(friendlyCloudError(err));
+  }
+}
+
+function scheduleAutoSync() {
+  if(autoSyncDebounceTimer) clearTimeout(autoSyncDebounceTimer);
+  autoSyncDebounceTimer = setTimeout(() => {
+    autoSyncDebounceTimer = null;
+    if(cloudDirty) queueCloudSync(true);
+  }, AUTO_SYNC_DEBOUNCE_MS);
+}
+
+function ensureAutoSyncHeartbeat() {
+  if(autoSyncHeartbeat) return;
+  autoSyncHeartbeat = setInterval(() => {
+    if(!cloudDirty || !navigator.onLine) return;
+    queueCloudSync(true);
+  }, AUTO_SYNC_HEARTBEAT_MS);
+}
+
+function queueCloudSync(silent) {
+  if(!supabaseClient || !currentUser) return;
+  if(syncInFlight) {
+    syncQueued = true;
+    return;
+  }
+  syncToCloud(silent);
+}
+
+async function syncToCloud(silent) {
+  if(!supabaseClient || !currentUser) return false;
+  if(!navigator.onLine) {
+    if(!silent) toast('You are offline. Sync will resume when online.');
+    return false;
+  }
+
+  const signedInUserId = currentUser?.id || null;
+  if(!signedInUserId) return false;
+  if(libraryOwnerId && libraryOwnerId !== signedInUserId) {
+    cloudDirty = false;
+    setSyncStatus('Account mismatch', 'error');
+    if(!silent) toast('This library belongs to another account. Pull cloud copy first.');
+    return false;
+  }
+  if(!libraryOwnerId) libraryOwnerId = signedInUserId;
+
+  try {
+    syncInFlight = true;
+    refreshSyncUI();
+
+    const hasLegacyPending = books.some(b => {
+      const legacy = typeof b?.legacyPdfData === 'string' ? b.legacyPdfData : '';
+      const hasCloudRef = !!((typeof b?.pdfUrl === 'string' && b.pdfUrl.trim()) || (typeof b?.pdfPath === 'string' && b.pdfPath.trim()));
+      return !!legacy && !hasCloudRef;
+    });
+    if(hasLegacyPending) {
+      await migrateLegacyPdfBooksInBackground();
+    }
+
+    const payload = JSON.stringify(libraryPayload());
+    if(payload && payload === lastSyncedPayloadSig) {
+      cloudDirty = false;
+      setSyncStatus('Cloud connected', 'ok');
+      if(!silent) toast('Already synced.');
+      return true;
+    }
+
+    const blob = new Blob([payload], { type: 'application/json' });
+    const { error } = await supabaseClient.storage.from(currentBucket()).upload(await cloudPath(), blob, {
+      upsert: true,
+      contentType: 'application/json',
+    });
+    if(error) throw error;
+
+    cloudDirty = false;
+    saveLocalCache();
+    lastSyncedPayloadSig = payload;
+    setSyncStatus('Cloud connected', 'ok');
+    if(!silent) toast('Library synced to cloud.');
+    return true;
+  } catch(err) {
+    setSyncStatus('Sync failed', 'error');
+    toast(friendlyCloudError(err));
+    return false;
+  } finally {
+    syncInFlight = false;
+    refreshSyncUI();
+    if(syncQueued) {
+      syncQueued = false;
+      syncToCloud(true);
+    }
+  }
+}
+
+async function pullFromCloud() {
+  if(!requireCloudReady()) return;
+  try {
+    setSyncStatus('Pulling cloud copy...', 'warn');
+    const remote = await fetchCloudLibrary();
+    if(!remote) {
+      setSyncStatus('Cloud empty', 'warn');
+      toast('No cloud copy yet. Sync this device first.');
+      return;
+    }
+    books = remote.books;
+    libraryUpdatedAt = remote.updatedAt || new Date().toISOString();
+    libraryOwnerId = currentUser?.id || libraryOwnerId || null;
+    cloudDirty = false;
+    saveLocalCache();
+    render();
+    lastSyncedPayloadSig = currentPayloadSignature();
+    setSyncStatus('Cloud connected', 'ok');
+    toast('Cloud library loaded on this device.');
+    await migrateLegacyPdfBooksInBackground();
+  } catch(err) {
+    setSyncStatus('Pull failed', 'error');
+    toast(friendlyCloudError(err));
+  }
+}
+
+async function signUp() {
+  const ready = await ensureClientFromForm(true);
+  if(!ready) return;
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if(!email || !password) {
+    toast('Enter email and password first.');
+    return;
+  }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if(error) {
+    setSyncStatus('Signup failed', 'error');
+    toast(friendlyAuthError(error));
+    return;
+  }
+  currentUser = data.user || null;
+  refreshSyncUI();
+  if(data.session?.user) {
+    await handlePostLogin();
+    toast('Account created and connected.');
+  } else {
+    toast('Account created. Confirm your email, then sign in.');
+  }
+}
+
+async function signIn() {
+  const ready = await ensureClientFromForm(true);
+  if(!ready) return;
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if(!email || !password) {
+    toast('Enter email and password first.');
+    return;
+  }
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if(error) {
+    setSyncStatus('Sign-in failed', 'error');
+    toast(friendlyAuthError(error));
+    return;
+  }
+  currentUser = data.user || null;
+  refreshSyncUI();
+  await handlePostLogin();
+  toast('Cloud sync connected.');
+}
+
+async function signOutCloud() {
+  let signOutError = null;
+  if(supabaseClient) {
+    const { error } = await supabaseClient.auth.signOut();
+    if(error) signOutError = error;
+  }
+
+  hardLocalSignOutCleanup();
+
+  if(signOutError) {
+    toast('Signed out locally and cleared books. Cloud sign-out had an issue.');
+    return;
+  }
+  toast('Signed out and cleared local account cache.');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  loadLocalCache();
+  if(libraryOwnerId && !readRememberedAuthSession()) {
+    clearPersistedLocalLibrary();
+    clearInMemoryLibraryView();
+  }
+  render();
+  updateBatchDeleteUi();
+  buildPalette();
+  fillCloudSettingsForm();
+  initSyncPanelState();
+  ensureAutoSyncHeartbeat();
+  window.addEventListener('online', () => { if(cloudDirty) queueCloudSync(true); });
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible' && cloudDirty) queueCloudSync(true);
+  });
+
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if(file && file.type==='application/pdf') handlePdfUpload({target:{files:[file]}});
+  });
+
+  const batchZone = document.getElementById('batch-upload-zone');
+  if(batchZone) {
+    batchZone.addEventListener('dragover', e => { e.preventDefault(); batchZone.classList.add('drag'); });
+    batchZone.addEventListener('dragleave', () => batchZone.classList.remove('drag'));
+    batchZone.addEventListener('drop', e => {
+      e.preventDefault();
+      batchZone.classList.remove('drag');
+      const files = Array.from(e.dataTransfer.files || []).filter(f => f && f.type==='application/pdf');
+      if(files.length) handleBatchPdfSelection({ target: { files } });
+    });
+  }
+  renderBatchFileList();
+
+  bindCloudSettingsAutoApply();
+  const ready = await applyCloudSettingsFromForm({ silent: true, force: true });
+  if(ready && currentUser) {
+    await handlePostLogin();
+  } else {
+    refreshSyncUI();
+  }
+  syncPanelFromAuthState();
+  document.addEventListener('pointerdown', collapseSyncPanelOnOutsideClick);
+  ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt => document.addEventListener(evt, handleReaderFullscreenChange));
+});
+
+document.addEventListener('keydown', async e => {
+  if(e.key === 'Escape') {
+    closeModal();
+    closeDetail();
+    closeReader();
+    closeBatchAdd();
+    if(batchDeleteMode) cancelBatchDelete();
+    return;
+  }
+
+  if(!readerIsOpen()) return;
+  if(e.altKey || e.ctrlKey || e.metaKey) return;
+  if(readerKeyTargetIgnored(e.target)) return;
+  if(isMobileReaderMode()) showReaderChromeTemporarily('interaction');
+
+  if(e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
+    e.preventDefault();
+    await goReaderNext();
+    return;
+  }
+
+  if(e.key === 'ArrowLeft') {
+    e.preventDefault();
+    await goReaderPrev();
+    return;
+  }
+
+  if(e.key === 'ArrowUp') {
+    e.preventDefault();
+    readerKeyScrollUp();
+    return;
+  }
+
+  if(e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    await toggleReaderFullscreen();
+    return;
+  }
+
+  if(e.key === 'ArrowDown') {
+    e.preventDefault();
+    readerKeyScrollDown();
+  }
+});
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
